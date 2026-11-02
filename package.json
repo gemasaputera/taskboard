@@ -12,6 +12,7 @@
     "dev:api": "pnpm --filter @kanban/api dev",
     "dev:web": "pnpm --filter @kanban/web dev",
     "build": "pnpm --filter @kanban/web build && pnpm --filter @kanban/api build",
+    "start": "pnpm --filter @kanban/api start",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",

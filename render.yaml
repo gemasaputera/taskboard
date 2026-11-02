@@ -1,0 +1,33 @@
+# Render Blueprint — deploys the API and the built SPA as one Docker service.
+#
+# 1. Push this repo to GitHub.
+# 2. In Render: New → Blueprint → pick the repo.
+# 3. Fill in the values marked `sync: false` (DATABASE_URL, DIRECT_URL/UNPOOLED, CLIENT_ORIGIN).
+#
+# Chatty free instances spin down after ~15 minutes idle; Socket.IO clients reconnect
+# automatically when they wake.
+services:
+  - type: web
+    name: kanban-board
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      # Pooled Neon connection string for the running API.
+      - key: DATABASE_URL
+        sync: false
+      # Direct (unpooled) connection; the app maps this to DIRECT_URL for migrations.
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      # Render generates a strong value; keep it out of source control.
+      - key: JWT_SECRET
+        generateValue: true
+      # Must be the public URL Render assigns, e.g. https://kanban-board.onrender.com
+      - key: CLIENT_ORIGIN
+        sync: false

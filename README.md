@@ -17,7 +17,7 @@ checklist, tags, comments — moving live with the people who care about it.
 - [Tests](#tests)
 - [Environment variables](#environment-variables)
 - [How it works](#how-it-works)
-- [Production](#production)
+- [Deploy](#deploy)
 - [Project layout](#project-layout)
 - [Contributing](#contributing)
 - [Security](#security)
@@ -231,24 +231,98 @@ single API instance.
 Comment authors can edit their own comments; authors and the owner can delete them. The owner
 cannot remove themselves or leave their own workplace (ownership transfer is not implemented).
 
-## Production
+## Deploy
 
-The API can serve the built SPA and the WebSocket from one origin:
+This app is **one long-lived Node service**: the API serves the built SPA and the WebSocket on the
+same origin (`app.ts`) and serves `apps/web/dist` when `NODE_ENV=production`. That keeps the session
+cookie first-party and lets Socket.IO connect with no CORS setup, so any host that runs a container
+works.
+
+> **Netlify / Vercel?** The SPA deploys there, but the API does not: serverless functions cannot
+> hold a Socket.IO connection open, and this API keeps socket rooms and rate-limit counters in
+> process memory. If you must split them, the session cookie is `SameSite=Lax`, so host both under
+> one site — e.g. `app.example.com` + `api.example.com` — or login will silently fail.
+
+The included `Dockerfile` builds both apps and starts the API with migrations applied.
+
+### Render (blueprint included)
+
+1. Push the repo to GitHub.
+2. Render → **New → Blueprint** → pick the repo (`render.yaml` is detected).
+3. Fill in the prompted values:
+   - `DATABASE_URL` — pooled Neon connection string.
+   - `DATABASE_URL_UNPOOLED` — direct Neon connection string (mapped to `DIRECT_URL`).
+   - `CLIENT_ORIGIN` — the public URL Render assigns, e.g. `https://kanban-board.onrender.com`.
+   - `JWT_SECRET` is generated for you.
+4. Deploy. The entrypoint applies migrations before the API starts listening.
+
+Free instances spin down after ~15 minutes idle; connected clients reconnect when the service wakes.
+
+### Railway
+
+1. New Project → Deploy from a GitHub repo (Railway detects the `Dockerfile`).
+2. Add `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `JWT_SECRET`, and `CLIENT_ORIGIN`.
+3. Generate a public domain, put that exact URL in `CLIENT_ORIGIN`, then redeploy.
+
+### Fly.io
 
 ```bash
-pnpm build
-NODE_ENV=production \
-CLIENT_ORIGIN="https://your-domain.example" \
-pnpm --filter @kanban/api start
+fly launch --no-deploy          # accept the Dockerfile; internal port 4000
+fly secrets set \
+  DATABASE_URL="postgresql://...pooler..." \
+  DATABASE_URL_UNPOOLED="postgresql://..." \
+  JWT_SECRET="$(openssl rand -base64 48)" \
+  CLIENT_ORIGIN="https://your-app.fly.dev"
+fly deploy
 ```
 
-Open the deployed origin. If you host the web app separately, point it at the API and update
-`CLIENT_ORIGIN`; the cookie is `SameSite=Lax`, so same-origin hosting is the least surprising setup.
-`start` preloads the repo-root `.env.local`, so a Neon-linked checkout needs no extra flags;
-production hosts should inject `DATABASE_URL`, `JWT_SECRET`, and `CLIENT_ORIGIN` directly.
-Cookies are marked `Secure` only when every configured origin is `https://`; a loopback
-`http://localhost` origin therefore keeps local production-mode testing working.
-For Neon, run `pnpm db:deploy` as part of the release step.
+### Plain Docker or a VPS
+
+```bash
+docker build -t kanban-board .
+docker run -d --name kanban -p 4000:4000 \
+  -e DATABASE_URL="postgresql://...pooler..." \
+  -e DATABASE_URL_UNPOOLED="postgresql://..." \
+  -e JWT_SECRET="<32+ random characters>" \
+  -e CLIENT_ORIGIN="https://your-domain.example" \
+  kanban-board
+```
+
+Point a reverse proxy (Caddy, nginx, Traefik) at port 4000 for TLS. Cookies are marked `Secure` only
+when every configured origin is `https://`, so a loopback origin keeps local production-mode testing
+working.
+
+### Required production variables
+
+| Variable                | Value                                                                     |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `DATABASE_URL`          | Pooled Postgres connection (Neon pooler or your own).                     |
+| `DATABASE_URL_UNPOOLED` | Direct connection; the app maps it to `DIRECT_URL` for migrations.         |
+| `JWT_SECRET`            | 32+ random characters. Never reuse the example value.                      |
+| `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`. Drives CORS + cookies. |
+| `NODE_ENV`              | `production` — serves the SPA from the API, enables `Secure` cookies on https origins. |
+
+`docker/entrypoint.sh` runs `prisma migrate deploy` before starting the server. To run migrations
+by hand, use `pnpm db:deploy`. If you ever run more than one replica, move migrations to a
+pre-deploy step and add a Redis adapter for Socket.IO first — the realtime layer assumes one
+process.
+
+### Native (no Docker)
+
+Any Node 22+ host works:
+
+```bash
+pnpm install && pnpm build
+pnpm db:deploy
+pnpm start
+```
+
+`start` preloads the repo-root `.env.local` when present, so a Neon-linked checkout needs no extra
+flags; otherwise provide the variables above from the host. A minimal manual run for smoke-testing:
+
+```bash
+NODE_ENV=production CLIENT_ORIGIN="https://your-domain.example" pnpm start
+```
 
 ## Project layout
 
@@ -258,6 +332,9 @@ apps/web        Vite React app, TanStack Query, dnd-kit board, Radix/Tailwind UI
 packages/shared Zod schemas, limits, DTOs, realtime event names
 docs            Screenshots
 docker/init     Creates the kanban_test database on first container boot
+docker/entrypoint.sh  Applies migrations, then starts the API (used by the Docker image)
+Dockerfile      Multi-stage image for Render, Railway, Fly.io, and plain Docker
+render.yaml     Render Blueprint: one web service, env vars, health check
 DESIGN.md       Design system: color, type, spacing, motion rules
 PRODUCT.md      Product intent, jobs to be done, principles
 ```

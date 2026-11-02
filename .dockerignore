@@ -1,0 +1,24 @@
+# Build context hygiene — keeps host artifacts and secrets out of the image.
+node_modules
+**/node_modules
+.pnpm-store
+**/dist
+**/coverage
+.git
+.gitignore
+.claude
+skills-lock.json
+
+# Secrets: these must match at any depth. A bare `.env` would only match the repo
+# root, which is how `apps/api/.env` ends up inside the image.
+**/.env
+**/.env.*
+.neon
+*.log
+
+docs
+.DS_Store
+Dockerfile
+.dockerignore
+render.yaml
+README.md
