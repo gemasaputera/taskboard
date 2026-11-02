@@ -1,0 +1,45 @@
+{
+  "name": "@kanban/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_OPTIONS='--import ./scripts/load-env.mjs' tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node --import ./scripts/load-env.mjs dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "node scripts/prisma.mjs generate",
+    "db:migrate": "node scripts/prisma.mjs migrate dev",
+    "db:deploy": "node scripts/prisma.mjs migrate deploy",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@kanban/shared": "workspace:*",
+    "@prisma/client": "^6.14.0",
+    "cookie": "^1.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
+    "jose": "^6.0.11",
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
+    "@types/supertest": "^6.0.3",
+    "prisma": "^6.14.0",
+    "socket.io-client": "^4.8.1",
+    "supertest": "^7.1.4",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

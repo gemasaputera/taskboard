@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  memberships         Membership[]
+  ownedWorkplaces     Workplace[]   @relation("WorkplaceOwner")
+  createdCards        Card[]        @relation("CardCreator")
+  assignedCards       CardAssignee[] @relation("CardAssignee")
+  comments            Comment[]
+  sentInvitations     Invitation[]  @relation("InvitationInviter")
+  receivedInvitations Invitation[]  @relation("InvitationInvitee")
+}
+
+model Workplace {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner       User         @relation("WorkplaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships Membership[]
+  columns     BoardColumn[]
+  cards       Card[]
+  tags        Tag[]
+  invitations Invitation[]
+}
+
+model Membership {
+  id          String   @id @default(uuid())
+  workplaceId String
+  userId      String
+  role        Role     @default(MEMBER)
+  joinedAt    DateTime @default(now())
+
+  workplace Workplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workplaceId, userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id          String       @id @default(uuid())
+  workplaceId String
+  inviterId   String
+  inviteeId   String
+  status      InviteStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  respondedAt DateTime?
+
+  workplace Workplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  inviter   User      @relation("InvitationInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee   User      @relation("InvitationInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([workplaceId, inviteeId])
+  @@index([inviteeId, status])
+}
+
+model BoardColumn {
+  id          String   @id @default(uuid())
+  workplaceId String
+  name        String
+  position    Int
+  isHidden    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workplace Workplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  cards     Card[]
+
+  @@index([workplaceId, position])
+}
+
+model Card {
+  id          String   @id @default(uuid())
+  workplaceId String
+  columnId    String
+  title       String
+  description String?  @db.Text
+  position    Int
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workplace Workplace   @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  column    BoardColumn @relation(fields: [columnId], references: [id], onDelete: Restrict)
+  createdBy User        @relation("CardCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  subtasks  Subtask[]
+  comments  Comment[]
+  tags      CardTag[]
+  assignees CardAssignee[]
+
+  @@index([columnId, position])
+  @@index([workplaceId])
+}
+
+model Subtask {
+  id        String   @id @default(uuid())
+  cardId    String
+  title     String
+  isDone    Boolean  @default(false)
+  position  Int
+  createdAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, position])
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  workplaceId String
+  name        String
+  color       String
+  createdAt   DateTime @default(now())
+
+  workplace Workplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+  cards     CardTag[]
+
+  @@unique([workplaceId, name])
+  @@index([workplaceId])
+}
+
+model CardTag {
+  cardId String
+  tagId  String
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, tagId])
+}
+
+model CardAssignee {
+  cardId     String
+  userId     String
+  assignedAt DateTime @default(now())
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation("CardAssignee", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, userId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  cardId    String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  card   Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([cardId, createdAt])
+}

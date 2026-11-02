@@ -1,0 +1,39 @@
+{
+  "name": "kanban-board",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.5.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @kanban/api --filter @kanban/web dev",
+    "dev:api": "pnpm --filter @kanban/api dev",
+    "dev:web": "pnpm --filter @kanban/web dev",
+    "build": "pnpm --filter @kanban/web build && pnpm --filter @kanban/api build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @kanban/api db:generate",
+    "db:migrate": "pnpm --filter @kanban/api db:migrate",
+    "db:deploy": "pnpm --filter @kanban/api db:deploy",
+    "test:db:up": "docker compose up -d --wait",
+    "test:db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "eslint": "^9.34.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
+  },
+  "dependencies": {
+    "@neon/config": "^1.10.0",
+    "@neon/env": "^1.6.8"
+  }
+}

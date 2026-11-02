@@ -1,0 +1,100 @@
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { env } from './env';
+import { errorHandler, notFoundHandler } from './errors';
+import { corsOrigin, isAllowedOrigin } from './lib/origins';
+import { authRouter } from './routes/auth';
+import { cardsRouter } from './routes/cards';
+import { columnsRouter } from './routes/columns';
+import { commentsRouter } from './routes/comments';
+import { invitationsRouter } from './routes/invitations';
+import { subtasksRouter } from './routes/subtasks';
+import { tagsRouter } from './routes/tags';
+import { workplacesRouter } from './routes/workplaces';
+
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+export function createApp() {
+  const app = express();
+
+  app.set('trust proxy', 1);
+  app.use(helmet());
+  app.use(
+    cors({
+      origin: corsOrigin,
+      credentials: true,
+    }),
+  );
+  app.use(express.json({ limit: '100kb' }));
+  app.use(cookieParser());
+
+  app.use((req, res, next) => {
+    if (SAFE_METHODS.has(req.method)) {
+      next();
+      return;
+    }
+
+    const origin = req.headers.origin;
+    if (origin && !isAllowedOrigin(origin)) {
+      res.status(403).json({
+        error: {
+          code: 'BAD_ORIGIN',
+          message: 'This origin is not allowed to make changes.',
+        },
+      });
+      return;
+    }
+
+    next();
+  });
+
+  const authLimiter = rateLimit({
+    windowMs: 60_000,
+    limit: 30,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  });
+
+  app.get('/api/health', (_req, res) => {
+    res.json({ ok: true });
+  });
+
+  app.use('/api/auth', authLimiter);
+  app.use('/api/auth', authRouter);
+  app.use('/api', workplacesRouter);
+  app.use('/api', invitationsRouter);
+  app.use('/api', columnsRouter);
+  app.use('/api', cardsRouter);
+  app.use('/api', subtasksRouter);
+  app.use('/api', commentsRouter);
+  app.use('/api', tagsRouter);
+
+  if (env.NODE_ENV === 'production') {
+    const webDist = fileURLToPath(new URL('../../web/dist', import.meta.url));
+    if (existsSync(webDist)) {
+      app.use(express.static(webDist));
+      app.use((req, res, next) => {
+        if (
+          req.method === 'GET' &&
+          !req.path.startsWith('/api') &&
+          !req.path.startsWith('/socket.io')
+        ) {
+          res.sendFile(path.join(webDist, 'index.html'));
+          return;
+        }
+        next();
+      });
+    }
+  }
+
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+
+  return app;
+}

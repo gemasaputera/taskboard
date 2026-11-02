@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2022"
+    ],
+    "types": [
+      "node"
+    ],
+    "baseUrl": "../..",
+    "paths": {
+      "@kanban/shared": [
+        "packages/shared/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "test",
+    "vitest.config.ts",
+    "tsup.config.ts"
+  ]
+}

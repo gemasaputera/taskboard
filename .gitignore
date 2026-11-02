@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+dist
+build
+*.tsbuildinfo
+.vite
+.turbo
+
+# Test output
+coverage
+
+# Environment / secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+*.local
+.neon
+*.pem
+*.key
+
+# Local agent tooling (vendored third-party skills, not app code)
+.claude
+skills-lock.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS / editor noise
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
