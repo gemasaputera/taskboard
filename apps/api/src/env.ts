@@ -8,6 +8,23 @@ import { z } from 'zod';
 const rootEnvFile = fileURLToPath(new URL('../../../.env.local', import.meta.url));
 const apiEnvFile = fileURLToPath(new URL('../.env', import.meta.url));
 
+/**
+ * Hosting dashboards frequently store a `.env` snippet verbatim, so the value can arrive
+ * wrapped in quotes or with a trailing newline. Prisma rejects those with P1013
+ * ("The scheme is not recognized"), so normalize before anything reads the URL.
+ */
+function normalizeUrl(value: string | undefined): string | undefined {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  const quoted = /^(['"])([\s\S]*)\1$/.exec(trimmed);
+  return quoted ? quoted[2] : trimmed;
+}
+
+for (const key of ['DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'DIRECT_URL'] as const) {
+  const normalized = normalizeUrl(process.env[key]);
+  if (normalized !== undefined) process.env[key] = normalized;
+}
+
 // A value already present in the real environment (a host, or `DIRECT_URL=... pnpm dev`)
 // must win over both files.
 const presetDirectUrl = process.env.DIRECT_URL;

@@ -12,6 +12,23 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/**
+ * Dashboard env fields often store a `.env` snippet verbatim — quotes included — which
+ * Prisma rejects with P1013 ("The scheme is not recognized"). Normalize before use.
+ */
+function normalizeUrl(value) {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  const quoted = /^(['"])([\s\S]*)\1$/.exec(trimmed);
+  return quoted ? quoted[2] : trimmed;
+}
+
+for (const key of ['DATABASE_URL', 'DATABASE_URL_UNPOOLED', 'DIRECT_URL']) {
+  if (process.env[key] !== undefined) {
+    process.env[key] = normalizeUrl(process.env[key]);
+  }
+}
+
 const apiDir = fileURLToPath(new URL('..', import.meta.url));
 const repoRoot = path.resolve(apiDir, '../..');
 const presetDirectUrl = process.env.DIRECT_URL;

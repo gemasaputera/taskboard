@@ -177,7 +177,7 @@ environment wins over both.
 | ----------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`          | root `.env.local` | Pooled Postgres connection used by the API (`neon deploy` writes it).                                                          |
 | `DATABASE_URL_UNPOOLED` | root `.env.local` | Direct Postgres connection; mapped to `DIRECT_URL`.                                                                            |
-| `DIRECT_URL`            | `apps/api`        | Direct Postgres connection for Prisma CLI/migrations. Defaults to `DATABASE_URL_UNPOOLED`.                                     |
+| `DIRECT_URL`            | `apps/api`        | Direct Postgres connection for Prisma CLI/migrations. Defaults to `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`.                |
 | `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it.                                                  |
 | `PORT`                  | `apps/api`        | API port, default `4000`.                                                                                                      |
 | `CLIENT_ORIGIN`         | `apps/api`        | Allowed browser origin(s) for CORS, Origin checks, and Socket.IO. Comma-separated; loopback ports are accepted when this is a loopback URL. |
@@ -251,9 +251,12 @@ The included `Dockerfile` builds both apps and starts the API with migrations ap
 2. Render → **New → Blueprint** → pick the repo (`render.yaml` is detected).
 3. Fill in the prompted values:
    - `DATABASE_URL` — pooled Neon connection string.
-   - `DATABASE_URL_UNPOOLED` — direct Neon connection string (mapped to `DIRECT_URL`).
+   - `DATABASE_URL_UNPOOLED` — direct Neon connection string (optional but recommended; mapped to
+     `DIRECT_URL`).
    - `CLIENT_ORIGIN` — the public URL Render assigns, e.g. `https://kanban-board.onrender.com`.
    - `JWT_SECRET` is generated for you.
+   Paste each value **bare**: Render stores exactly what you type, so `"postgresql://…"` with
+   surrounding quotes — valid inside a `.env` file — becomes an invalid URL at runtime.
 4. Deploy. The entrypoint applies migrations before the API starts listening.
 
 Free instances spin down after ~15 minutes idle; connected clients reconnect when the service wakes.
@@ -292,20 +295,39 @@ Point a reverse proxy (Caddy, nginx, Traefik) at port 4000 for TLS. Cookies are 
 when every configured origin is `https://`, so a loopback origin keeps local production-mode testing
 working.
 
-### Required production variables
+### Production variables
 
 | Variable                | Value                                                                     |
 | ----------------------- | ------------------------------------------------------------------------- |
 | `DATABASE_URL`          | Pooled Postgres connection (Neon pooler or your own).                     |
-| `DATABASE_URL_UNPOOLED` | Direct connection; the app maps it to `DIRECT_URL` for migrations.         |
+| `DATABASE_URL_UNPOOLED` | Optional. Direct connection; mapped to `DIRECT_URL` for migrations, falling back to `DATABASE_URL`. |
 | `JWT_SECRET`            | 32+ random characters. Never reuse the example value.                      |
 | `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`. Drives CORS + cookies. |
 | `NODE_ENV`              | `production` — serves the SPA from the API, enables `Secure` cookies on https origins. |
 
-`docker/entrypoint.sh` runs `prisma migrate deploy` before starting the server. To run migrations
-by hand, use `pnpm db:deploy`. If you ever run more than one replica, move migrations to a
-pre-deploy step and add a Redis adapter for Socket.IO first — the realtime layer assumes one
+`docker/entrypoint.sh` runs `prisma migrate deploy` before starting the server. Set only
+`DATABASE_URL` if your host provides a single connection string — migrations reuse it. To run
+migrations by hand, use `pnpm db:deploy`. If you ever run more than one replica, move migrations
+to a pre-deploy step and add a Redis adapter for Socket.IO first — the realtime layer assumes one
 process.
+
+### Troubleshooting
+
+**`P1013: The provided database string is invalid. The scheme is not recognized`**
+
+Prisma received something that is not a bare URL. The usual causes are surrounding quotes, a
+pasted `DATABASE_URL=` prefix, or a trailing newline. `docker/entrypoint.sh` trims whitespace and
+strips one layer of quotes, and logs the scheme it found; if it still fails, inspect the value from
+the Render shell:
+
+```bash
+node -e 'const u = new URL(process.env.DATABASE_URL); console.log(u.protocol, u.hostname)'
+```
+
+It should print `postgresql:` and your Neon host, e.g. `ep-xxx-pooler.ap-southeast-1.aws.neon.tech`.
+An exception means the variable itself is malformed — re-paste it from the Neon dashboard, choosing
+the **pooled** connection string for `DATABASE_URL` and the **direct** one for
+`DATABASE_URL_UNPOOLED`.
 
 ### Native (no Docker)
 
