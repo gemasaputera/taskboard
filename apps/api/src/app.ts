@@ -36,7 +36,24 @@ export function createApp() {
   const app = express();
 
   app.set('trust proxy', 1);
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          // The OAuth consent form posts to /oauth/authorize, then redirects to the
+          // client's callback, which is normally a different HTTPS origin. Without
+          // this, browsers block the redirect because of `form-action 'self'`.
+          formAction: [
+            "'self'",
+            'https:',
+            'http://localhost:*',
+            'http://127.0.0.1:*',
+            'http://[::1]:*',
+          ],
+        },
+      },
+    }),
+  );
   app.use(
     cors({
       origin: corsOrigin,
