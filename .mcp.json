@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "kanban": {
+      "command": "node",
+      "args": ["apps/mcp/dist/index.js"]
+    }
+  }
+}

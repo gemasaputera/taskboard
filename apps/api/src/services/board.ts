@@ -36,6 +36,7 @@ function mapTag(tag: { id: string; name: string; color: string }): TagDto {
 export function mapCardSummary(card: CardSummaryRecord): CardSummaryDto {
   return {
     id: card.id,
+    workplaceId: card.workplaceId,
     columnId: card.columnId,
     title: card.title,
     position: card.position,
@@ -107,6 +108,7 @@ export async function getCardDetail(userId: string, cardId: string): Promise<Car
 
   return {
     id: card.id,
+    workplaceId: card.workplaceId,
     columnId: card.columnId,
     title: card.title,
     description: card.description,

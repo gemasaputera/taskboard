@@ -24,6 +24,7 @@ coverage
 # Local agent tooling (vendored third-party skills, not app code)
 .claude
 skills-lock.json
+.kanban-mcp
 
 # Logs
 *.log
