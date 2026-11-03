@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { emailSchema, passwordSchema, usernameSchema } from '@kanban/shared';
+import { emailSchema, LIMITS, passwordSchema, usernameSchema } from '@kanban/shared';
 import { z } from 'zod';
 import type { KanbanApiClient } from '../client.js';
 import { json } from './shared.js';
@@ -33,7 +33,11 @@ export function registerAuthTools(server: McpServer, client: KanbanApiClient): v
           .min(1, 'Enter your username or email.')
           .max(254)
           .describe('Username or email address.'),
-        password: passwordSchema.describe('Account password.'),
+        password: z
+          .string()
+          .min(1, 'Enter your password.')
+          .max(LIMITS.passwordMax)
+          .describe('Account password.'),
       },
       annotations: { openWorldHint: false },
     },
@@ -49,10 +53,13 @@ export function registerAuthTools(server: McpServer, client: KanbanApiClient): v
         'To Do, Revision, On Progress, and Done. Only use when the user explicitly asks to sign up.',
       inputSchema: {
         username: usernameSchema.describe(
-          'Lowercase letters, numbers, underscores; 3-24 characters.',
+          'Lowercase letters, numbers, underscores; 3-24 characters; not a reserved name.',
         ),
         email: emailSchema.describe('Unique email address.'),
-        password: passwordSchema.describe('At least 8 characters.'),
+        password: passwordSchema.describe(
+          '8-200 characters with uppercase and lowercase letters, a number, and a symbol. ' +
+            'Must not be a common password or contain the username/email.',
+        ),
       },
       annotations: { openWorldHint: false },
     },

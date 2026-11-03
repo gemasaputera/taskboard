@@ -59,12 +59,29 @@ export function createApp() {
     limit: 30,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
+    // Live sign-up checks have their own budget below; counting them here would
+    // make a user hit the login/register limit before they finish the form.
+    skip: (req) => req.path === '/availability',
+  });
+
+  const availabilityLimiter = rateLimit({
+    windowMs: 60_000,
+    limit: 60,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: {
+      error: {
+        code: 'RATE_LIMITED',
+        message: 'Too many availability checks. Try again in a minute.',
+      },
+    },
   });
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
   });
 
+  app.use('/api/auth/availability', availabilityLimiter);
   app.use('/api/auth', authLimiter);
   app.use('/api/auth', authRouter);
   app.use('/api', workplacesRouter);

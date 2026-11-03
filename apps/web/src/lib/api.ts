@@ -1,5 +1,6 @@
 import type {
   ApiErrorPayload,
+  AvailabilityResponse,
   BoardDto,
   CardAssigneeDto,
   CardDetailDto,
@@ -34,12 +35,14 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   body?: unknown;
+  signal?: AbortSignal;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const response = await fetch(`/api${path}`, {
     method: options.method ?? 'GET',
     credentials: 'include',
+    signal: options.signal,
     headers: options.body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
@@ -85,6 +88,12 @@ export const api = {
   login: (input: LoginInput) => request<MeResponse>('/auth/login', { method: 'POST', body: input }),
   register: (input: RegisterInput) =>
     request<MeResponse>('/auth/register', { method: 'POST', body: input }),
+  checkAvailability: (input: { username?: string; email?: string }, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    if (input.username) params.set('username', input.username);
+    if (input.email) params.set('email', input.email);
+    return request<AvailabilityResponse>(`/auth/availability?${params.toString()}`, { signal });
+  },
   logout: () => request<void>('/auth/logout', { method: 'POST' }),
 
   listWorkplaces: () => request<WorkplaceSummary[]>('/workplaces'),

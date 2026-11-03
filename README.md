@@ -33,6 +33,9 @@ checklist, tags, comments — moving live with the people who care about it.
 - **Multiple workplaces** — create more from the workplace switcher; you own each one you create.
 - **In-app invitations** — the owner invites an already-registered user by exact username or email.
   The invitee accepts or declines from the bell; membership is live immediately.
+- **Guided sign-up** — usernames and emails are checked against the database as you type, spaces
+  and uppercase are normalized away, and a live meter enforces a stronger password (8+ characters,
+  mixed case, a number, and a symbol; no common or account-derived passwords).
 - **Rich cards** — title, Markdown description with a Write/Preview editor, created/updated dates,
   checklist subtasks with progress, multiple colored tags, multiple assignees (unassigned by
   default), and a comment thread.
@@ -423,6 +426,18 @@ this repo), and allow a reasonable window for a fix before disclosing it.
 Two things to know if you deploy this: `JWT_SECRET` must be a unique random value (the example file
 ships a deliberately insecure development default), and the realtime layer assumes a single API
 instance — add a Redis adapter before scaling horizontally.
+
+Sign-up hardening:
+
+- Usernames are trimmed, lowercased, and limited to `a-z`, `0-9`, and `_`; embedded spaces and
+  reserved names (`admin`, `support`, `api`, …) are rejected.
+- Passwords must be 8–200 characters with uppercase and lowercase letters, a number, and a symbol,
+  must not appear on a common-password list, and must not contain the username or email local-part.
+- `GET /api/auth/availability` powers the live check, is limited to 60 requests/minute per IP, and
+  returns `Cache-Control: no-store`. It necessarily reveals whether a username or email exists;
+  keep the limit in place if you expose the app publicly.
+- The availability check is a UX aid only. `POST /api/auth/register` re-checks both columns and maps
+  unique-constraint races to per-field `409 CONFLICT` errors.
 
 ## Intentionally out of scope (v1)
 

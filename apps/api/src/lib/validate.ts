@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import { AppError } from '../errors';
 
-export function parseBody<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
+function parseInput<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
   const result = schema.safeParse(data);
   if (!result.success) {
     const flattened = result.error.flatten();
@@ -14,4 +14,12 @@ export function parseBody<T extends z.ZodTypeAny>(schema: T, data: unknown): z.i
     throw new AppError(400, 'VALIDATION_ERROR', 'Invalid input.', fields);
   }
   return result.data;
+}
+
+export function parseBody<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
+  return parseInput(schema, data);
+}
+
+export function parseQuery<T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> {
+  return parseInput(schema, data);
 }

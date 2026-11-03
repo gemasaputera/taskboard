@@ -36,7 +36,7 @@ export async function registerUser(prefix = 'user'): Promise<RegisteredUser> {
   const response = await agent.post('/api/auth/register').send({
     username,
     email: `${username}@example.com`,
-    password: 'password123',
+    password: 'Kanban!Passw0rd',
   });
 
   if (response.status !== 201) {
