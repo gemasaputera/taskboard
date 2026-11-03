@@ -88,13 +88,34 @@ describe('OAuth metadata', () => {
   });
 
   it('rejects non-loopback HTTP redirect URIs', async () => {
-    const response = await request(app).post('/oauth/register').send({
-      client_name: 'Bad client',
-      redirect_uris: ['http://example.test/callback'],
-    });
+    const response = await request(app)
+      .post('/oauth/register')
+      .send({
+        client_name: 'Bad client',
+        redirect_uris: ['http://example.test/callback'],
+      });
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('invalid_redirect_uri');
+  });
+
+  it('accepts registration from a local callback origin', async () => {
+    const response = await request(app)
+      .post('/oauth/register')
+      .set('Origin', 'http://localhost:27890')
+      .send({ client_name: 'Hermes Agent', redirect_uris: [redirectUri] });
+
+    expect(response.status).toBe(201);
+  });
+
+  it('still rejects foreign origins for cookie-authenticated mutations', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .set('Origin', 'https://evil.example')
+      .send({ identifier: 'nobody', password: 'wrong-password' });
+
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe('BAD_ORIGIN');
   });
 });
 
@@ -123,13 +144,17 @@ describe('OAuth authorization code flow', () => {
     const code = location.searchParams.get('code');
     expect(code).toBeTruthy();
 
-    const token = await user.agent.post('/oauth/token').type('form').send({
-      grant_type: 'authorization_code',
-      code,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      code_verifier: verifier,
-    });
+    const token = await user.agent
+      .post('/oauth/token')
+      .set('Origin', 'http://localhost:27890')
+      .type('form')
+      .send({
+        grant_type: 'authorization_code',
+        code,
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code_verifier: verifier,
+      });
 
     expect(token.status).toBe(200);
     expect(token.body.token_type).toBe('Bearer');
@@ -188,13 +213,17 @@ describe('OAuth authorization code flow', () => {
       .redirects(0);
     const code = new URL(consent.headers.location).searchParams.get('code');
 
-    const token = await user.agent.post('/oauth/token').type('form').send({
-      grant_type: 'authorization_code',
-      code,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      code_verifier: randomBytes(48).toString('base64url'),
-    });
+    const token = await user.agent
+      .post('/oauth/token')
+      .set('Origin', 'http://localhost:27890')
+      .type('form')
+      .send({
+        grant_type: 'authorization_code',
+        code,
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code_verifier: randomBytes(48).toString('base64url'),
+      });
 
     expect(token.status).toBe(400);
     expect(token.body.error).toBe('invalid_grant');
@@ -205,7 +234,10 @@ describe('remote MCP endpoint', () => {
   it('requires an OAuth bearer token', async () => {
     const response = await fetch(`${mcpBaseUrl}/mcp`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'http://localhost:27890',
+      },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
     });
 
@@ -225,7 +257,12 @@ describe('remote MCP endpoint', () => {
     });
 
     const transport = new StreamableHTTPClientTransport(new URL(`${mcpBaseUrl}/mcp`), {
-      requestInit: { headers: { Authorization: `Bearer ${token}` } },
+      requestInit: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Origin: 'http://localhost:27890',
+        },
+      },
     });
     const client = new Client({ name: 'oauth-test', version: '0.0.0' });
 

@@ -80,6 +80,11 @@ OAuth clients are registered dynamically; access tokens live for one hour and re
 30 days. The consent page runs on `PUBLIC_URL`, so that origin must be reachable and allowed by
 `CLIENT_ORIGIN` (the API adds `PUBLIC_URL` automatically).
 
+`/oauth/register`, `/oauth/token`, and `/mcp` are exempt from the browser origin guard because they
+authenticate with OAuth tokens rather than the session cookie. OAuth clients such as Hermes may
+send their local callback origin on those requests. The consent POST to `/oauth/authorize` remains
+guarded.
+
 ## Development and production
 
 In development, the API runs on port `4000` and Vite proxies `/api`, `/socket.io`, `/oauth`, and
