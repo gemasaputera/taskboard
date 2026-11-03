@@ -1,6 +1,7 @@
 import { APP_NAME } from '@kanban/shared';
 import { ArrowRight, CheckCircle2, GripVertical } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { SiteFooter } from '../../components/SiteFooter';
 
 interface AuthShellProps {
   title: string;
@@ -17,7 +18,7 @@ const previewCards = [
 
 export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
   return (
-    <div className="grid min-h-dvh bg-canvas lg:grid-cols-[1.05fr_1fr]">
+    <div className="grid min-h-dvh grid-rows-[1fr_auto] bg-canvas lg:grid-cols-[1.05fr_1fr]">
       <aside className="relative hidden overflow-hidden bg-ink px-14 py-12 text-white lg:flex lg:flex-col">
         <div className="auth-grid pointer-events-none absolute inset-0 opacity-40" />
         <div className="relative flex items-center gap-3">
@@ -91,7 +92,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
         </div>
       </aside>
 
-      <main className="flex min-h-dvh flex-col px-5 py-8 sm:px-10 lg:px-16">
+      <main className="flex flex-col px-5 py-8 sm:px-10 lg:px-16">
         <div className="flex items-center gap-3 lg:hidden">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-base font-bold text-white">
             K
@@ -110,6 +111,8 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           <div className="mt-8 text-sm text-muted">{footer}</div>
         </div>
       </main>
+
+      <SiteFooter className="lg:col-span-2" />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/toaster';
+import { SiteFooter } from './components/SiteFooter';
 import { useAuth } from './features/auth/AuthProvider';
 import { AuthProvider } from './features/auth/AuthProvider';
 import { LoginPage } from './features/auth/LoginPage';
@@ -100,20 +101,23 @@ function WorkplaceRedirect() {
 function NotFoundPage() {
   const { user } = useAuth();
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-canvas p-6">
-      <div className="max-w-sm text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">404</p>
-        <h1 className="mt-2 text-xl font-semibold text-ink">Page not found</h1>
-        <p className="mt-1.5 text-sm text-muted">
-          The page you’re looking for doesn’t exist or has moved.
-        </p>
-        <Link
-          className="mt-5 inline-flex h-9 items-center rounded-lg bg-accent px-3.5 text-sm font-medium text-white hover:bg-accent/90"
-          to={user ? '/app' : '/login'}
-        >
-          Go to {user ? 'your board' : 'sign in'}
-        </Link>
+    <div className="flex min-h-dvh flex-col bg-canvas">
+      <div className="flex flex-1 items-center justify-center p-6">
+        <div className="max-w-sm text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">404</p>
+          <h1 className="mt-2 text-xl font-semibold text-ink">Page not found</h1>
+          <p className="mt-1.5 text-sm text-muted">
+            The page you’re looking for doesn’t exist or has moved.
+          </p>
+          <Link
+            className="mt-5 inline-flex h-9 items-center rounded-lg bg-accent px-3.5 text-sm font-medium text-white hover:bg-accent/90"
+            to={user ? '/app' : '/login'}
+          >
+            Go to {user ? 'your board' : 'sign in'}
+          </Link>
+        </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
