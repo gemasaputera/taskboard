@@ -16,9 +16,11 @@ function normalizeOrigin(origin: string): string {
 }
 
 export function configuredOrigins(): string[] {
-  return env.CLIENT_ORIGIN.split(',')
-    .map(normalizeOrigin)
-    .filter(Boolean);
+  const values = [env.PUBLIC_URL, ...env.CLIENT_ORIGIN.split(',')].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  return [...new Set(values.map(normalizeOrigin).filter(Boolean))];
 }
 
 /**

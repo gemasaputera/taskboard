@@ -46,6 +46,14 @@ export default defineConfig({
         target: 'http://localhost:4000',
         ws: true,
       },
+      '/oauth': {
+        target: 'http://localhost:4000',
+        changeOrigin: false,
+      },
+      '/.well-known': {
+        target: 'http://localhost:4000',
+        changeOrigin: false,
+      },
     },
   },
   test: {

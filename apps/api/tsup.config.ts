@@ -6,5 +6,5 @@ export default defineConfig({
   target: 'node22',
   clean: true,
   sourcemap: true,
-  noExternal: ['@kanban/shared'],
+  noExternal: ['@kanban/shared', '@kanban/mcp'],
 });

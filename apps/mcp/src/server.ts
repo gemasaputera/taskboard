@@ -20,13 +20,24 @@ const INSTRUCTIONS = `Kanban board tools for a small-team Trello-style app.
   and cancel_invitation.`;
 
 /** Builds the MCP server without attaching a transport, which also makes it testable. */
-export function createKanbanServer(client: KanbanApiClient): McpServer {
+export interface KanbanServerOptions {
+  /**
+   * Register `login`, `register_account`, and `logout`. Disable these for OAuth-backed
+   * HTTP sessions, where the caller's access token already identifies the user.
+   */
+  authTools?: boolean;
+}
+
+export function createKanbanServer(
+  client: KanbanApiClient,
+  options: KanbanServerOptions = {},
+): McpServer {
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     { instructions: INSTRUCTIONS },
   );
 
-  registerTools(server, client);
+  registerTools(server, client, options);
 
   return server;
 }

@@ -1,19 +1,39 @@
 # MCP server (AI agents)
 
 `apps/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server that exposes a
-Kanban board as **39 tools**. An AI client can read the board, create and move cards, manage
-checklists, comments, tags, assignees, columns, members, and invitations — no browser needed.
+Kanban board as **39 tools** over stdio, or **36 tools** over Streamable HTTP with OAuth. An AI
+client can read the board, create and move cards, manage checklists, comments, tags, assignees,
+columns, members, and invitations — no browser needed.
 
 ```
-AI client ── stdio MCP ──> apps/mcp ── REST + session cookie ──> apps/api ──> Postgres
-                                                                  └─ Socket.IO ──> open browsers
+AI client ── HTTP + OAuth ──> /mcp ── Bearer ──> /api ──> Postgres
+                                                   └─ Socket.IO ──> open browsers
+
+AI client ── stdio ──> apps/mcp ── REST + session cookie ──> apps/api ──> Postgres
+                                                              └─ Socket.IO ──> open browsers
 ```
 
 The MCP server is a thin client of the same HTTP API the web app uses. Nothing is reimplemented:
 validation, ownership rules, card ordering, and Socket.IO broadcasts all still happen in the API,
 so a browser that happens to be open updates live.
 
-## Quick start
+## Remote HTTP with OAuth
+
+The API service hosts the remote endpoint at `/mcp`, plus the OAuth metadata, registration,
+authorization, and token endpoints. Hermes Agent can connect with no local build or credentials:
+
+```yaml
+mcp_servers:
+  kanban:
+    url: 'https://kanban-board-p4kk.onrender.com/mcp'
+    auth: oauth
+```
+
+Approve the consent page once; Hermes stores and refreshes the tokens. `PUBLIC_URL` (or the first
+`CLIENT_ORIGIN` in production) must be the app's public HTTPS origin. The HTTP endpoint omits
+`login`, `register_account`, and `logout` because the access token identifies the user.
+
+## Quick start (stdio)
 
 **1. Start the API** (the MCP server needs it for every tool call):
 
@@ -111,7 +131,17 @@ env = { KANBAN_API_URL = "http://localhost:4000" }
 
 ### Hermes Agent
 
-In `~/.hermes/config.yaml`:
+Hermes can use the remote HTTP endpoint (recommended; no local build or credentials):
+
+```yaml
+mcp_servers:
+  kanban:
+    url: 'https://kanban-board-p4kk.onrender.com/mcp'
+    auth: oauth
+```
+
+Approve the consent page once; Hermes stores and refreshes the tokens. For stdio on the same
+machine as the repo, use `command` instead:
 
 ```yaml
 mcp_servers:
@@ -126,11 +156,8 @@ mcp_servers:
     connect_timeout: 60
 ```
 
-Put the credentials in `~/.hermes/.env`, or remove them and call the `login` tool once. Reload with
-`/reload-mcp`. Hermes registers the tools as `mcp__kanban__<tool>`.
-
-> Hermes supports HTTP MCP servers too, but this server speaks only stdio — run it on the machine
-> where Hermes runs.
+For stdio, put the credentials in `~/.hermes/.env`, or remove them and call the `login` tool once.
+Reload with `/reload-mcp`. Hermes registers the tools as `mcp__kanban__<tool>`.
 
 ### Any other stdio MCP client
 
@@ -139,7 +166,10 @@ speaks JSON-RPC over stdin/stdout; all diagnostics go to stderr, so stdout stays
 
 ## Authentication
 
-The API uses an httpOnly session cookie. The MCP server obtains it in one of three ways:
+For HTTP, the `/mcp` endpoint verifies the OAuth access token and forwards it to the API as a
+Bearer token. The `login`, `register_account`, and `logout` tools are not registered in that mode.
+
+For stdio, the API uses an httpOnly session cookie. The MCP server obtains it in one of three ways:
 
 | Method                       | How                                                            | Persists?                |
 | ---------------------------- | -------------------------------------------------------------- | ------------------------ |

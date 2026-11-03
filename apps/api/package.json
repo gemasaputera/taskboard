@@ -15,7 +15,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@kanban/mcp": "workspace:*",
     "@kanban/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@prisma/client": "^6.14.0",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",

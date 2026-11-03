@@ -6,6 +6,7 @@ import {
   Link,
   Navigate,
   RouterProvider,
+  useSearchParams,
 } from 'react-router-dom';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/toaster';
@@ -45,8 +46,13 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 function PublicOnly({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('next');
+
   if (loading) return <Splash />;
-  if (user) return <Navigate to="/app" replace />;
+  // Keep the login page mounted during an OAuth return trip so the submit handler
+  // can hand off to the API authorize URL instead of racing a redirect to /app.
+  if (user && !returnTo) return <Navigate to="/app" replace />;
   return <>{children}</>;
 }
 
@@ -60,7 +66,10 @@ function BoardFallback() {
   return (
     <div className="flex h-full gap-4 p-4 md:p-6">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-48 w-[85vw] shrink-0 animate-pulse rounded-xl border border-line bg-surface-soft sm:w-[17.5rem]" />
+        <div
+          key={index}
+          className="h-48 w-[85vw] shrink-0 animate-pulse rounded-xl border border-line bg-surface-soft sm:w-[17.5rem]"
+        />
       ))}
     </div>
   );

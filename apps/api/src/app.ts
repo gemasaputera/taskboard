@@ -14,6 +14,8 @@ import { cardsRouter } from './routes/cards';
 import { columnsRouter } from './routes/columns';
 import { commentsRouter } from './routes/comments';
 import { invitationsRouter } from './routes/invitations';
+import { mcpRouter } from './routes/mcp';
+import { oauthRouter } from './routes/oauth';
 import { subtasksRouter } from './routes/subtasks';
 import { tagsRouter } from './routes/tags';
 import { workplacesRouter } from './routes/workplaces';
@@ -32,6 +34,7 @@ export function createApp() {
     }),
   );
   app.use(express.json({ limit: '100kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '10kb' }));
   app.use(cookieParser());
 
   app.use((req, res, next) => {
@@ -80,6 +83,17 @@ export function createApp() {
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
   });
+
+  const oauthLimiter = rateLimit({
+    windowMs: 60_000,
+    limit: 60,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+  });
+
+  app.use('/oauth', oauthLimiter);
+  app.use(oauthRouter);
+  app.use(mcpRouter);
 
   app.use('/api/auth/availability', availabilityLimiter);
   app.use('/api/auth', authLimiter);
