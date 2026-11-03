@@ -1,0 +1,32 @@
+name: Sync docs to ReadMe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/readme/**'
+      - '.github/workflows/readme-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: readme-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Upload guides
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check frontmatter and links
+        run: node scripts/validate-readme-docs.mjs
+
+      - name: Upload docs to ReadMe
+        uses: readmeio/rdme@v10
+        with:
+          rdme: docs upload ./docs/readme --branch=stable --key=${{ secrets.README_API_KEY }}

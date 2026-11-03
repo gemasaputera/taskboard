@@ -159,6 +159,10 @@ workplace (or `KANBAN_WORKPLACE_ID` is set); otherwise the error lists your work
 | `register_account` | Create an account and its default workplace          |
 | `logout`           | Discard the cached session                           |
 
+`register_account` enforces the sign-up rules: lowercase usernames without spaces or reserved
+names, and a password with mixed case, a number, and a symbol that is not common or account-derived.
+Validation errors come back per field.
+
 ### Workplaces and members
 
 | Tool               | What it does                                     | Access |
