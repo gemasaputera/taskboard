@@ -22,6 +22,11 @@ import { workplacesRouter } from './routes/workplaces';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
+// OAuth clients (including Hermes Agent) may stamp their local callback origin on
+// these requests. They authenticate with OAuth tokens rather than the session
+// cookie, so a foreign Origin cannot perform a CSRF-style action.
+const COOKIELESS_MUTATIONS = new Set(['/oauth/register', '/oauth/token', '/mcp']);
+
 export function createApp() {
   const app = express();
 
@@ -39,6 +44,11 @@ export function createApp() {
 
   app.use((req, res, next) => {
     if (SAFE_METHODS.has(req.method)) {
+      next();
+      return;
+    }
+
+    if (COOKIELESS_MUTATIONS.has(req.path)) {
       next();
       return;
     }
