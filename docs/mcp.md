@@ -109,6 +109,29 @@ args = ["/absolute/path/to/kanban-board/apps/mcp/dist/index.js"]
 env = { KANBAN_API_URL = "http://localhost:4000" }
 ```
 
+### Hermes Agent
+
+In `~/.hermes/config.yaml`:
+
+```yaml
+mcp_servers:
+  kanban:
+    command: 'node'
+    args: ['/absolute/path/to/kanban-board/apps/mcp/dist/index.js']
+    env:
+      KANBAN_API_URL: 'https://kanban-board-p4kk.onrender.com'
+      KANBAN_USERNAME: '${KANBAN_USERNAME}'
+      KANBAN_PASSWORD: '${KANBAN_PASSWORD}'
+    timeout: 120
+    connect_timeout: 60
+```
+
+Put the credentials in `~/.hermes/.env`, or remove them and call the `login` tool once. Reload with
+`/reload-mcp`. Hermes registers the tools as `mcp__kanban__<tool>`.
+
+> Hermes supports HTTP MCP servers too, but this server speaks only stdio — run it on the machine
+> where Hermes runs.
+
 ### Any other stdio MCP client
 
 Launch `node <repo>/apps/mcp/dist/index.js` with `KANBAN_API_URL` in the environment. The server
