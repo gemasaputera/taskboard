@@ -67,7 +67,7 @@ describe('accounts and workplaces', () => {
     const me = await ada.call('register_account', {
       username: 'ada',
       email: 'ada@example.com',
-      password: 'password123',
+      password: 'Kanban!Passw0rd',
     });
 
     expect(me.user).toMatchObject({ username: 'ada', email: 'ada@example.com' });
@@ -129,7 +129,7 @@ describe('accounts and workplaces', () => {
 
     const ada = await harness({
       username: 'ada',
-      password: 'password123',
+      password: 'Kanban!Passw0rd',
       sessionToken: 'stale-cookie-value',
     });
 
@@ -386,7 +386,7 @@ describe('actionable errors', () => {
     const ada = await harness({
       apiUrl: 'http://127.0.0.1:1',
       username: 'ada',
-      password: 'password123',
+      password: 'Kanban!Passw0rd',
     });
 
     const result = await ada.raw('whoami');

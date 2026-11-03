@@ -104,7 +104,7 @@ export async function signUp(
   await harness.call('register_account', {
     username,
     email: `${username}@example.com`,
-    password: 'password123',
+    password: 'Kanban!Passw0rd',
   });
 
   return harness;
