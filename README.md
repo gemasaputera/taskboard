@@ -16,6 +16,7 @@ checklist, tags, comments — moving live with the people who care about it.
 - [Quick start](#quick-start)
 - [Tests](#tests)
 - [MCP server](#mcp-server-ai-agents)
+- [Documentation site](#documentation-site-readme)
 - [Environment variables](#environment-variables)
 - [How it works](#how-it-works)
 - [Deploy](#deploy)
@@ -196,6 +197,26 @@ Authenticate once by asking the AI to call the `login` tool (the session is cach
 
 See [docs/mcp.md](docs/mcp.md) for Claude Desktop, Cursor, and Codex setup, the full tool list,
 environment variables, and troubleshooting.
+
+## Documentation site (ReadMe)
+
+The hosted guides live in `docs/readme/` as ReadMe-ready Markdown. Nine pages cover getting
+started, concepts, configuration, deployment, the REST API, and the MCP server.
+
+**ReadMe project:** <https://kanbantask.readme.io>. If the site shows “Not Yet Active”, finish the
+project activation in the ReadMe dashboard — see the [setup guide](docs/readme-setup.md#activate-the-project).
+
+```bash
+export README_API_KEY=rdme_your_key_here
+
+pnpm docs:check      # offline: frontmatter, slugs, and links (no key)
+pnpm docs:validate   # ReadMe dry run: validates frontmatter and previews changes
+pnpm docs:publish    # create or update the pages in ReadMe
+```
+
+The [sync workflow](.github/workflows/readme-sync.yml) uploads `docs/readme/` on every push to
+`main` that touches those files. See [docs/readme-setup.md](docs/readme-setup.md) for the one-time
+ReadMe project setup, category names, and frontmatter reference.
 
 ## Environment variables
 
@@ -388,7 +409,7 @@ apps/api        Express API, Prisma schema/migrations, Socket.IO, Vitest integra
 apps/web        Vite React app, TanStack Query, dnd-kit board, Radix/Tailwind UI
 apps/mcp        MCP stdio server: 39 board tools for Claude, Cursor, Codex, and other AI clients
 packages/shared Zod schemas, limits, DTOs, realtime event names
-docs            Screenshots and the MCP setup guide
+docs            Screenshots, the MCP guide, and ReadMe-ready pages in `docs/readme/`
 docker/init     Creates the kanban_test database on first container boot
 docker/entrypoint.sh  Applies migrations, then starts the API (used by the Docker image)
 Dockerfile      Multi-stage image for Render, Railway, Fly.io, and plain Docker

@@ -1,0 +1,28 @@
+name: Check ReadMe docs
+
+on:
+  pull_request:
+    paths:
+      - 'docs/readme/**'
+      - 'scripts/validate-readme-docs.mjs'
+      - '.github/workflows/docs-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Validate frontmatter and links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run docs check
+        run: node scripts/validate-readme-docs.mjs
