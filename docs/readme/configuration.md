@@ -82,8 +82,9 @@ OAuth clients are registered dynamically; access tokens live for one hour and re
 
 `/oauth/register`, `/oauth/token`, and `/mcp` are exempt from the browser origin guard because they
 authenticate with OAuth tokens rather than the session cookie. OAuth clients such as Hermes may
-send their local callback origin on those requests. The consent POST to `/oauth/authorize` remains
-guarded.
+send their local callback origin on those requests. The consent POST to `/oauth/authorize` is
+protected by a signed, short-lived consent token instead of the Origin header, so it also works from
+sandboxed OAuth browsers that send `Origin: null`.
 
 ## Development and production
 

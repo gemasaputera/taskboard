@@ -11,6 +11,7 @@ export const ACCESS_TOKEN_TTL_SECONDS = 60 * 60;
 const ACCESS_TOKEN_TTL = '1h';
 const REFRESH_TOKEN_TTL = '30d';
 const AUTH_CODE_TTL = '5m';
+const CONSENT_TTL = '10m';
 const CLIENT_TTL = '365d';
 
 export interface OAuthClientClaims extends JWTPayload {
@@ -43,6 +44,17 @@ export interface OAuthRefreshClaims extends JWTPayload {
   client_id: string;
   scope: string;
   resource: string;
+}
+
+export interface OAuthConsentClaims extends JWTPayload {
+  typ: 'oauth_consent';
+  sub: string;
+  client_id: string;
+  redirect_uri: string;
+  code_challenge: string;
+  scope: string;
+  resource: string;
+  state?: string;
 }
 
 async function signToken(payload: JWTPayload, expiresIn: string): Promise<string> {
@@ -175,6 +187,38 @@ export async function createRefreshToken(input: {
 
 export async function readRefreshToken(token: string): Promise<OAuthRefreshClaims | null> {
   return readToken<OAuthRefreshClaims>(token, 'oauth_refresh');
+}
+
+/**
+ * Binds the consent form to the signed-in user and the exact authorization
+ * request. This replaces the Origin check for the consent POST, which can arrive
+ * with an opaque (`Origin: null`) origin from an embedded/sandboxed browser.
+ */
+export async function createConsentToken(input: {
+  userId: string;
+  clientId: string;
+  redirectUri: string;
+  codeChallenge: string;
+  scope: string;
+  resource: string;
+  state?: string;
+}): Promise<string> {
+  const payload: OAuthConsentClaims = {
+    typ: 'oauth_consent',
+    sub: input.userId,
+    client_id: input.clientId,
+    redirect_uri: input.redirectUri,
+    code_challenge: input.codeChallenge,
+    scope: input.scope,
+    resource: input.resource,
+    ...(input.state ? { state: input.state } : {}),
+  };
+
+  return signToken(payload, CONSENT_TTL);
+}
+
+export async function readConsentToken(token: string): Promise<OAuthConsentClaims | null> {
+  return readToken<OAuthConsentClaims>(token, 'oauth_consent');
 }
 
 /** OAuth redirect URIs must be HTTPS, or HTTP on a loopback host. */

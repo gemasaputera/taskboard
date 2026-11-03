@@ -27,6 +27,11 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 // cookie, so a foreign Origin cannot perform a CSRF-style action.
 const COOKIELESS_MUTATIONS = new Set(['/oauth/register', '/oauth/token', '/mcp']);
 
+// The consent POST is bound to the user and the exact request by a signed,
+// short-lived consent token. Embedded/sandboxed OAuth browsers may send
+// `Origin: null`, so the token replaces the Origin check on this one route.
+const CSRF_TOKEN_MUTATIONS = new Set(['/oauth/authorize']);
+
 export function createApp() {
   const app = express();
 
@@ -48,7 +53,7 @@ export function createApp() {
       return;
     }
 
-    if (COOKIELESS_MUTATIONS.has(req.path)) {
+    if (COOKIELESS_MUTATIONS.has(req.path) || CSRF_TOKEN_MUTATIONS.has(req.path)) {
       next();
       return;
     }

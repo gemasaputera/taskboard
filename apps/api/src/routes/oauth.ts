@@ -8,6 +8,7 @@ import {
   createAccessToken,
   createAuthorizationCode,
   createClientRegistration,
+  createConsentToken,
   createRefreshToken,
   isValidCodeChallenge,
   isValidCodeVerifier,
@@ -17,6 +18,7 @@ import {
   pkceChallenge,
   readAuthorizationCode,
   readClientRegistration,
+  readConsentToken,
   readRefreshToken,
 } from '../auth/oauth';
 import { prisma } from '../db';
@@ -37,8 +39,9 @@ const authorizeSchema = z.object({
   resource: z.string().url().optional(),
 });
 
-const decisionSchema = authorizeSchema.extend({
+const consentSubmissionSchema = z.object({
   decision: z.enum(['allow', 'deny']),
+  consent_token: z.string().min(1),
 });
 
 const registerSchema = z
@@ -192,30 +195,7 @@ function errorPage(title: string, description: string): string {
 <h1>${escapeHtml(title)}</h1><p>${escapeHtml(description)}</p></main></body></html>`;
 }
 
-function consentPage(
-  input: z.infer<typeof authorizeSchema>,
-  details: AuthorizeInput,
-  username: string,
-): string {
-  const hidden: [string, string | undefined][] = [
-    ['response_type', input.response_type],
-    ['client_id', input.client_id],
-    ['redirect_uri', input.redirect_uri],
-    ['state', input.state],
-    ['code_challenge', input.code_challenge],
-    ['code_challenge_method', input.code_challenge_method],
-    ['scope', details.scope],
-    ['resource', details.resource],
-  ];
-
-  const fields = hidden
-    .filter(([, value]) => value !== undefined)
-    .map(
-      ([name, value]) =>
-        `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value ?? '')}" />`,
-    )
-    .join('\n      ');
-
+function consentPage(details: AuthorizeInput, username: string, consentToken: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Authorize ${escapeHtml(details.clientName)} · Kanban</title>
@@ -225,7 +205,7 @@ function consentPage(
 <p>A client wants to connect to your Kanban board as <strong>@${escapeHtml(username)}</strong>.</p>
 <div class="scope"><strong>This will let it</strong>Read and manage your workplaces, boards, cards, checklists, comments, tags, and members.</div>
 <form method="post" action="/oauth/authorize">
-      ${fields}
+  <input type="hidden" name="consent_token" value="${escapeHtml(consentToken)}" />
   <div class="actions">
     <button class="deny" type="submit" name="decision" value="deny">Cancel</button>
     <button class="allow" type="submit" name="decision" value="allow">Allow access</button>
@@ -377,41 +357,77 @@ oauthRouter.get('/oauth/authorize', async (req, res) => {
     return;
   }
 
-  res.type('html').send(consentPage(parsed.data, checked.value, user.username));
+  const consentToken = await createConsentToken({
+    userId: user.id,
+    clientId: parsed.data.client_id,
+    redirectUri: checked.value.redirectUri,
+    codeChallenge: parsed.data.code_challenge,
+    scope: checked.value.scope,
+    resource: checked.value.resource,
+    state: parsed.data.state,
+  });
+
+  res.type('html').send(consentPage(checked.value, user.username, consentToken));
 });
 
 oauthRouter.post('/oauth/authorize', async (req, res) => {
-  const parsed = decisionSchema.safeParse(req.body);
+  const parsed = consentSubmissionSchema.safeParse(req.body);
 
   if (!parsed.success) {
     res
       .status(400)
       .type('html')
-      .send(errorPage('Invalid authorization request', 'Check the client configuration.'));
+      .send(errorPage('Invalid consent', 'Reload the authorization page and try again.'));
     return;
   }
 
-  const checked = await validateAuthorize(parsed.data);
-  if (!checked.ok) {
+  const consent = await readConsentToken(parsed.data.consent_token);
+  if (!consent) {
     res
-      .status(checked.status)
+      .status(400)
       .type('html')
-      .send(errorPage('Invalid authorization request', checked.description));
+      .send(errorPage('Consent expired', 'Start the authorization again.'));
     return;
   }
 
   const user = await currentUser(req);
   if (!user) {
-    loginRedirect(req, res, authorizeGetPath(parsed.data));
+    loginRedirect(
+      req,
+      res,
+      authorizeGetPath({
+        response_type: 'code',
+        client_id: consent.client_id,
+        redirect_uri: consent.redirect_uri,
+        state: consent.state,
+        code_challenge: consent.code_challenge,
+        code_challenge_method: 'S256',
+        scope: consent.scope,
+        resource: consent.resource,
+      }),
+    );
+    return;
+  }
+
+  if (user.id !== consent.sub) {
+    res
+      .status(400)
+      .type('html')
+      .send(
+        errorPage(
+          'Consent does not match',
+          'Sign in as the same user and try the authorization again.',
+        ),
+      );
     return;
   }
 
   if (parsed.data.decision === 'deny') {
     res.redirect(
-      redirectWith(checked.value.redirectUri, {
+      redirectWith(consent.redirect_uri, {
         error: 'access_denied',
         error_description: 'The user denied the request.',
-        state: parsed.data.state,
+        state: consent.state,
       }),
     );
     return;
@@ -419,17 +435,17 @@ oauthRouter.post('/oauth/authorize', async (req, res) => {
 
   const code = await createAuthorizationCode({
     userId: user.id,
-    clientId: parsed.data.client_id,
-    redirectUri: checked.value.redirectUri,
-    codeChallenge: parsed.data.code_challenge,
-    scope: checked.value.scope,
-    resource: checked.value.resource,
+    clientId: consent.client_id,
+    redirectUri: consent.redirect_uri,
+    codeChallenge: consent.code_challenge,
+    scope: consent.scope,
+    resource: consent.resource,
   });
 
   res.redirect(
-    redirectWith(checked.value.redirectUri, {
+    redirectWith(consent.redirect_uri, {
       code,
-      state: parsed.data.state,
+      state: consent.state,
     }),
   );
 });

@@ -45,6 +45,12 @@ function authorizeQuery(clientId: string, challenge: string) {
   };
 }
 
+function consentTokenFrom(html: string): string {
+  const match = /name="consent_token" value="([^"]+)"/.exec(html);
+  if (!match) throw new Error('consent token not found in the authorization page');
+  return match[1];
+}
+
 let mcpServer: Server;
 let mcpBaseUrl: string;
 
@@ -130,11 +136,13 @@ describe('OAuth authorization code flow', () => {
     expect(authorize.status).toBe(200);
     expect(authorize.text).toContain('Allow Hermes Agent?');
     expect(authorize.text).toContain(user.username);
+    const consentToken = consentTokenFrom(authorize.text);
 
     const consent = await user.agent
       .post('/oauth/authorize')
+      .set('Origin', 'null')
       .type('form')
-      .send({ ...query, decision: 'allow' })
+      .send({ consent_token: consentToken, decision: 'allow' })
       .redirects(0);
 
     expect(consent.status).toBe(302);
@@ -206,10 +214,14 @@ describe('OAuth authorization code flow', () => {
     const { challenge } = pkce();
     const query = authorizeQuery(clientId, challenge);
 
+    const authorize = await user.agent.get('/oauth/authorize').query(query);
+    const consentToken = consentTokenFrom(authorize.text);
+
     const consent = await user.agent
       .post('/oauth/authorize')
+      .set('Origin', 'null')
       .type('form')
-      .send({ ...query, decision: 'allow' })
+      .send({ consent_token: consentToken, decision: 'allow' })
       .redirects(0);
     const code = new URL(consent.headers.location).searchParams.get('code');
 
@@ -227,6 +239,22 @@ describe('OAuth authorization code flow', () => {
 
     expect(token.status).toBe(400);
     expect(token.body.error).toBe('invalid_grant');
+  });
+
+  it('rejects a consent POST without a signed token', async () => {
+    const user = await registerUser('oauthcsrf');
+    const clientId = await registerClient(user.agent);
+    const { challenge } = pkce();
+
+    const response = await user.agent
+      .post('/oauth/authorize')
+      .set('Origin', 'null')
+      .type('form')
+      .send({ decision: 'allow', client_id: clientId, code_challenge: challenge })
+      .redirects(0);
+
+    expect(response.status).toBe(400);
+    expect(response.text).toContain('Invalid consent');
   });
 });
 
