@@ -7,7 +7,7 @@ slug: mcp-clients
 privacy:
   view: public
 content:
-  excerpt: Copy-paste configurations for Claude Code, Claude Desktop, Cursor, Codex, and any other stdio MCP client.
+  excerpt: Copy-paste configurations for Claude Code, Claude Desktop, Cursor, Codex, Hermes Agent, and any other stdio MCP client.
 ---
 
 The MCP server is a **stdio** server: your client launches `node apps/mcp/dist/index.js` and talks
@@ -19,6 +19,10 @@ pnpm --filter @kanban/mcp build
 
 Outside Claude Code, use an **absolute** path to `dist/index.js`; other clients do not launch
 servers relative to this repository.
+
+For the deployed app, set `KANBAN_API_URL` to `https://kanban-board-p4kk.onrender.com` instead of
+`http://localhost:4000`. On Render's free tier, the first request after an idle period can take
+30–60 seconds to wake the service; the MCP client waits up to 60 seconds for it.
 
 ## Claude Code
 
@@ -80,6 +84,32 @@ command = "node"
 args = ["/absolute/path/to/taskboard/apps/mcp/dist/index.js"]
 env = { KANBAN_API_URL = "http://localhost:4000" }
 ```
+
+## Hermes Agent
+
+Hermes Agent reads MCP servers from `~/.hermes/config.yaml`. It supports local stdio servers, so
+point it at the built entrypoint and the deployed API:
+
+```yaml
+mcp_servers:
+  kanban:
+    command: 'node'
+    args: ['/absolute/path/to/taskboard/apps/mcp/dist/index.js']
+    env:
+      KANBAN_API_URL: 'https://kanban-board-p4kk.onrender.com'
+      KANBAN_USERNAME: '${KANBAN_USERNAME}'
+      KANBAN_PASSWORD: '${KANBAN_PASSWORD}'
+    timeout: 120
+    connect_timeout: 60
+```
+
+Put the two credentials in `~/.hermes/.env`, or remove those lines and ask Hermes to call the
+`login` tool once. Reload the configuration with `/reload-mcp` after editing it.
+
+Hermes prefixes the tools as `mcp__kanban__whoami`, `mcp__kanban__get_board`, and so on.
+
+> 📘 Hermes also supports remote HTTP MCP servers via `url:`, but this server currently speaks
+> only stdio. Run it on the machine where Hermes runs, with network access to the Kanban API.
 
 ## Other stdio clients
 

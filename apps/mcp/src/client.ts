@@ -106,7 +106,9 @@ export class KanbanApiClient {
   ) {
     this.apiUrl = config.apiUrl;
     this.store = new SessionStore(config.sessionFile);
-    this.timeoutMs = options.timeoutMs ?? 20_000;
+    // A cold Render instance can take close to a minute to wake, so allow more than
+    // the usual request budget for the first call against the hosted API.
+    this.timeoutMs = options.timeoutMs ?? 60_000;
 
     if (config.username && config.password) {
       this.credentials = { identifier: config.username, password: config.password };

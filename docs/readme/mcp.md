@@ -41,8 +41,8 @@ pnpm --filter @kanban/mcp build
 
 ## 2. Point your client at it
 
-The repository ships a `.mcp.json` for Claude Code. For Claude Desktop, Cursor, Codex, and other
-clients, copy the config from [MCP clients](/docs/mcp-clients).
+The repository ships a `.mcp.json` for Claude Code. For Claude Desktop, Cursor, Codex, Hermes
+Agent, and other clients, copy the config from [MCP clients](/docs/mcp-clients).
 
 ## 3. Sign in
 
@@ -92,7 +92,7 @@ and card IDs.
 ## Next
 
 - [MCP tools](/docs/mcp-tools) — every tool and what it does.
-- [MCP clients](/docs/mcp-clients) — Claude Code, Claude Desktop, Cursor, and Codex setups.
+- [MCP clients](/docs/mcp-clients) — Claude Code, Claude Desktop, Cursor, Codex, and Hermes Agent setups.
 - [Troubleshooting](#troubleshooting).
 
 ## Troubleshooting
