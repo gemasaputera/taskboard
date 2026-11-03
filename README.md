@@ -195,8 +195,8 @@ Authenticate once by asking the AI to call the `login` tool (the session is cach
 `~/.kanban-mcp/session.json`), or set `KANBAN_USERNAME` / `KANBAN_PASSWORD`. A project-scoped
 `.mcp.json` is included for Claude Code; other clients get config snippets in the guide.
 
-See [docs/mcp.md](docs/mcp.md) for Claude Desktop, Cursor, and Codex setup, the full tool list,
-environment variables, and troubleshooting.
+See [docs/mcp.md](docs/mcp.md) for Claude Desktop, Cursor, Codex, and Hermes Agent setup, the full
+tool list, environment variables, and troubleshooting.
 
 ## Documentation site (ReadMe)
 
