@@ -367,6 +367,7 @@ oauthRouter.get('/oauth/authorize', async (req, res) => {
     state: parsed.data.state,
   });
 
+  res.set('Cache-Control', 'no-store');
   res.type('html').send(consentPage(checked.value, user.username, consentToken));
 });
 

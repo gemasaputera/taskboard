@@ -134,6 +134,7 @@ describe('OAuth authorization code flow', () => {
 
     const authorize = await user.agent.get('/oauth/authorize').query(query);
     expect(authorize.status).toBe(200);
+    expect(authorize.headers['cache-control']).toContain('no-store');
     expect(authorize.text).toContain('Allow Hermes Agent?');
     expect(authorize.text).toContain(user.username);
     const consentToken = consentTokenFrom(authorize.text);
@@ -146,6 +147,10 @@ describe('OAuth authorization code flow', () => {
       .redirects(0);
 
     expect(consent.status).toBe(302);
+    const csp = consent.headers['content-security-policy'] ?? '';
+    expect(csp).toContain('form-action');
+    expect(csp).toContain('https:');
+    expect(csp).toContain('http://localhost:*');
     const location = new URL(consent.headers.location);
     expect(`${location.origin}${location.pathname}`).toBe(redirectUri);
     expect(location.searchParams.get('state')).toBe('state-123');

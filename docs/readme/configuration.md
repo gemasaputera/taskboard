@@ -86,6 +86,9 @@ send their local callback origin on those requests. The consent POST to `/oauth/
 protected by a signed, short-lived consent token instead of the Origin header, so it also works from
 sandboxed OAuth browsers that send `Origin: null`.
 
+The consent page's CSP allows form redirects to HTTPS and loopback callback origins, so the browser
+can return to the OAuth client after **Allow access**.
+
 ## Development and production
 
 In development, the API runs on port `4000` and Vite proxies `/api`, `/socket.io`, `/oauth`, and
