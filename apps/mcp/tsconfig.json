@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "baseUrl": "../..",
+    "paths": {
+      "@kanban/shared": ["packages/shared/src/index.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "test",
+    "vitest.config.ts",
+    "tsup.config.ts",
+    // The integration tests boot the real API in-process, which relies on this global
+    // Express Request augmentation.
+    "../api/src/types/express.d.ts"
+  ]
+}

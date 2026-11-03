@@ -259,6 +259,7 @@ export interface CardAssigneeDto {
 
 export interface CardSummaryDto {
   id: string;
+  workplaceId: string;
   columnId: string;
   title: string;
   position: number;

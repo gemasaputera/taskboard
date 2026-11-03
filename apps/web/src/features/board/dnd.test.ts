@@ -10,6 +10,7 @@ import {
 function card(id: string, columnId: string, position: number): CardSummaryDto {
   return {
     id,
+    workplaceId: 'w1',
     columnId,
     title: id,
     position,

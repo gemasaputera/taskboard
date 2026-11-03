@@ -15,6 +15,7 @@ checklist, tags, comments — moving live with the people who care about it.
 - [Stack](#stack)
 - [Quick start](#quick-start)
 - [Tests](#tests)
+- [MCP server](#mcp-server-ai-agents)
 - [Environment variables](#environment-variables)
 - [How it works](#how-it-works)
 - [Deploy](#deploy)
@@ -40,6 +41,8 @@ checklist, tags, comments — moving live with the people who care about it.
 - **Realtime** — Socket.IO keeps every member's board in sync; disconnected clients fall back to
   refetching on reconnect/focus.
 - **Roles** — owner manages structure, invitations, members, and tags; members work on cards.
+- **AI access** — an MCP server exposes 39 board tools, so Claude, Cursor, Codex, or any MCP
+  client can work the board without a browser.
 
 ## Stack
 
@@ -48,6 +51,7 @@ checklist, tags, comments — moving live with the people who care about it.
 | Web      | Vite, React 19, TypeScript, React Router, TanStack Query, dnd-kit, Tailwind v4, Radix UI |
 | API      | Express 5, Prisma ORM, Zod, Socket.IO, `jose` JWT, Node `scrypt` password hashing        |
 | Database | PostgreSQL (Neon in production; Docker Postgres for local/test)                          |
+| AI       | MCP stdio server (`@modelcontextprotocol/sdk`) driving the REST API                     |
 | Tests    | Vitest, Supertest, socket.io-client, React Testing Library                               |
 
 ## Quick start
@@ -136,7 +140,7 @@ origin in development.
 
 ## Tests
 
-The API suite needs a separate PostgreSQL database. The Docker Compose service creates
+The API and MCP suites need a separate PostgreSQL database. The Docker Compose service creates
 `kanban_test` on first boot, and the default test URL is
 `postgresql://kanban:kanban@localhost:5433/kanban_test?schema=public`.
 
@@ -150,6 +154,9 @@ pnpm --filter @kanban/api exec prisma migrate deploy
 pnpm test
 ```
 
+`pnpm test` runs both packages serially (`--workspace-concurrency=1`) because they share the test
+database. The MCP suite boots the real API in-process and drives the server through the MCP SDK.
+
 If you already had the Docker volume from an older checkout without the init SQL, recreate it
 (`docker compose down -v` — destructive) or create the `kanban_test` database manually.
 
@@ -161,6 +168,31 @@ pnpm lint
 pnpm build
 pnpm format          # Prettier, writes files
 ```
+
+## MCP server (AI agents)
+
+`apps/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the
+board as **39 tools** — read the board, create and move cards, manage checklists, comments, tags,
+assignees, columns, members, and invitations — so an AI client can work the board without opening
+the browser.
+
+It drives the same REST API as the web app, so permissions, ordering, and realtime updates behave
+identically. The API must be running (`pnpm dev:api`), or point the server at a deployed URL.
+
+```bash
+pnpm build          # builds the web app, API, and MCP server
+pnpm dev:api        # in another terminal
+
+# normally launched by your AI client, not by hand:
+node apps/mcp/dist/index.js
+```
+
+Authenticate once by asking the AI to call the `login` tool (the session is cached in
+`~/.kanban-mcp/session.json`), or set `KANBAN_USERNAME` / `KANBAN_PASSWORD`. A project-scoped
+`.mcp.json` is included for Claude Code; other clients get config snippets in the guide.
+
+See [docs/mcp.md](docs/mcp.md) for Claude Desktop, Cursor, and Codex setup, the full tool list,
+environment variables, and troubleshooting.
 
 ## Environment variables
 
@@ -351,8 +383,9 @@ NODE_ENV=production CLIENT_ORIGIN="https://your-domain.example" pnpm start
 ```
 apps/api        Express API, Prisma schema/migrations, Socket.IO, Vitest integration tests
 apps/web        Vite React app, TanStack Query, dnd-kit board, Radix/Tailwind UI
+apps/mcp        MCP stdio server: 39 board tools for Claude, Cursor, Codex, and other AI clients
 packages/shared Zod schemas, limits, DTOs, realtime event names
-docs            Screenshots
+docs            Screenshots and the MCP setup guide
 docker/init     Creates the kanban_test database on first container boot
 docker/entrypoint.sh  Applies migrations, then starts the API (used by the Docker image)
 Dockerfile      Multi-stage image for Render, Railway, Fly.io, and plain Docker
