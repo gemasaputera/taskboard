@@ -89,13 +89,18 @@ flags. Otherwise provide the production variables from the host environment.
 
 ## Production variables
 
-| Variable                | Value                                                |
-| :---------------------- | :--------------------------------------------------- |
-| `DATABASE_URL`          | Pooled PostgreSQL connection                         |
-| `DATABASE_URL_UNPOOLED` | Optional direct connection for migrations            |
-| `JWT_SECRET`            | 32+ random characters; never reuse the example value |
-| `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`   |
-| `NODE_ENV`              | `production`                                         |
+| Variable                | Value                                                           |
+| :---------------------- | :-------------------------------------------------------------- |
+| `DATABASE_URL`          | Pooled PostgreSQL connection                                    |
+| `DATABASE_URL_UNPOOLED` | Optional direct connection for migrations                       |
+| `JWT_SECRET`            | 32+ random characters; never reuse the example value            |
+| `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`              |
+| `PUBLIC_URL`            | Public origin for OAuth and `/mcp`; defaults to `CLIENT_ORIGIN` |
+| `NODE_ENV`              | `production`                                                    |
+
+The same service hosts the remote MCP endpoint at `/mcp` and the OAuth metadata and endpoints, so
+there is no separate MCP deployment. Set `PUBLIC_URL` only when the public origin differs from the
+first `CLIENT_ORIGIN`; it must use HTTPS and have no trailing path.
 
 `docker/entrypoint.sh` runs `prisma migrate deploy` before starting the server. If you run more
 than one replica, move migrations to a pre-deploy step and add a Redis adapter for Socket.IO.

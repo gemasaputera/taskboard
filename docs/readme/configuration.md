@@ -24,16 +24,17 @@ process environment wins over both, which is what hosting platforms use.
 
 ## Variables
 
-| Variable                | Where             | Purpose                                                                                                     |
-| :---------------------- | :---------------- | :---------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`          | root `.env.local` | Pooled PostgreSQL connection used by the API                                                                |
-| `DATABASE_URL_UNPOOLED` | root `.env.local` | Direct connection; mapped to `DIRECT_URL`                                                                   |
-| `DIRECT_URL`            | `apps/api`        | Direct connection for Prisma CLI and migrations; defaults to `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`   |
-| `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it                                |
-| `PORT`                  | `apps/api`        | API port, default `4000`                                                                                    |
-| `CLIENT_ORIGIN`         | `apps/api`        | Allowed browser origin(s), comma-separated. Drives CORS, Origin checks, and Socket.IO                       |
-| `NODE_ENV`              | `apps/api`        | `development`, `test`, or `production`. Production serves the built SPA and enables secure cookies on HTTPS |
-| `TEST_DATABASE_URL`     | `apps/api`        | Database used by the Vitest setup; defaults to the local `kanban_test` database                             |
+| Variable                | Where             | Purpose                                                                                                                                  |
+| :---------------------- | :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | root `.env.local` | Pooled PostgreSQL connection used by the API                                                                                             |
+| `DATABASE_URL_UNPOOLED` | root `.env.local` | Direct connection; mapped to `DIRECT_URL`                                                                                                |
+| `DIRECT_URL`            | `apps/api`        | Direct connection for Prisma CLI and migrations; defaults to `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`                                |
+| `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it                                                             |
+| `PORT`                  | `apps/api`        | API port, default `4000`                                                                                                                 |
+| `CLIENT_ORIGIN`         | `apps/api`        | Allowed browser origin(s), comma-separated. Drives CORS, Origin checks, and Socket.IO                                                    |
+| `PUBLIC_URL`            | `apps/api`        | Public origin for OAuth metadata and `/mcp`. Defaults to the first `CLIENT_ORIGIN` in production, `http://localhost:PORT` in development |
+| `NODE_ENV`              | `apps/api`        | `development`, `test`, or `production`. Production serves the built SPA and enables secure cookies on HTTPS                              |
+| `TEST_DATABASE_URL`     | `apps/api`        | Database used by the Vitest setup; defaults to the local `kanban_test` database                                                          |
 
 Generate a production secret with any cryptographically random source:
 
@@ -68,10 +69,21 @@ repeatedly restarts and re-authenticates can hit the limit; wait a minute and re
 `GET /api/auth/availability` has its own **60 requests per minute per IP** budget and returns
 `Cache-Control: no-store`, so a user typing into the sign-up form does not exhaust the login limit.
 
+## Remote MCP and OAuth
+
+The API also hosts the remote MCP endpoint at `/mcp` and the OAuth metadata and endpoints. Set
+`PUBLIC_URL` to the app's public HTTPS origin if it differs from the first `CLIENT_ORIGIN`. The
+value is used for `/.well-known/oauth-protected-resource`, the authorization-server metadata, the
+`/oauth` endpoints, and the consent redirects.
+
+OAuth clients are registered dynamically; access tokens live for one hour and refresh tokens for
+30 days. The consent page runs on `PUBLIC_URL`, so that origin must be reachable and allowed by
+`CLIENT_ORIGIN` (the API adds `PUBLIC_URL` automatically).
+
 ## Development and production
 
-In development, the API runs on port `4000` and Vite proxies `/api` and `/socket.io` to it, so the
-session cookie and WebSocket share one origin.
+In development, the API runs on port `4000` and Vite proxies `/api`, `/socket.io`, `/oauth`, and
+`/.well-known` to it, so the session cookie, OAuth consent, and WebSocket share one host.
 
 In production, set `NODE_ENV=production`. The API then serves `apps/web/dist` and the WebSocket on
 the same origin and enables `Secure` cookies when the configured origins are HTTPS.

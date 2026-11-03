@@ -64,6 +64,12 @@ const envSchema = z.object({
   DIRECT_URL: z.string().min(1),
   JWT_SECRET: z.string().min(32),
   CLIENT_ORIGIN: clientOriginSchema.default('http://localhost:5173'),
+  /**
+   * Public origin used for OAuth metadata, the /mcp endpoint, and consent
+   * redirects. Defaults to the first CLIENT_ORIGIN in production and to
+   * http://localhost:PORT in development.
+   */
+  PUBLIC_URL: z.string().url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

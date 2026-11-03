@@ -176,12 +176,23 @@ pnpm format          # Prettier, writes files
 ## MCP server (AI agents)
 
 `apps/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server that exposes the
-board as **39 tools** — read the board, create and move cards, manage checklists, comments, tags,
-assignees, columns, members, and invitations — so an AI client can work the board without opening
-the browser.
+board as **39 tools** over stdio, or **36 tools** over Streamable HTTP with OAuth — read the board,
+create and move cards, manage checklists, comments, tags, assignees, columns, members, and
+invitations — so an AI client can work the board without opening the browser.
 
 It drives the same REST API as the web app, so permissions, ordering, and realtime updates behave
 identically. The API must be running (`pnpm dev:api`), or point the server at a deployed URL.
+
+Remote clients can use the OAuth-protected endpoint at `/mcp`:
+
+```yaml
+mcp_servers:
+  kanban:
+    url: "https://kanban-board-p4kk.onrender.com/mcp"
+    auth: oauth
+```
+
+For local stdio clients:
 
 ```bash
 pnpm build          # builds the web app, API, and MCP server
@@ -237,6 +248,7 @@ environment wins over both.
 | `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it.                                                  |
 | `PORT`                  | `apps/api`        | API port, default `4000`.                                                                                                      |
 | `CLIENT_ORIGIN`         | `apps/api`        | Allowed browser origin(s) for CORS, Origin checks, and Socket.IO. Comma-separated; loopback ports are accepted when this is a loopback URL. |
+| `PUBLIC_URL`            | `apps/api`        | Public origin for OAuth metadata and `/mcp`. Defaults to the first `CLIENT_ORIGIN` in production, `http://localhost:PORT` in development. |
 | `NODE_ENV`              | `apps/api`        | `development`, `test`, or `production` (enables static SPA + secure cookies).                                                   |
 | `TEST_DATABASE_URL`     | `apps/api`        | Used by the Vitest setup; defaults to the local `kanban_test` database.                                                        |
 

@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 import { Button } from '../../components/ui/button';
@@ -15,9 +15,31 @@ import { AuthShell } from './AuthShell';
 
 type LoginValues = z.infer<typeof loginSchema>;
 
+/**
+ * Only allow a same-origin path, the current origin, or a loopback API origin in
+ * development. Prevents an open redirect while supporting the OAuth consent flow.
+ */
+function safeNext(value: string | null): string | null {
+  if (!value) return null;
+  if (value.startsWith('/') && !value.startsWith('//')) return value;
+
+  try {
+    const url = new URL(value);
+    const allowed = new Set([window.location.origin]);
+    if (import.meta.env.DEV) {
+      allowed.add('http://localhost:4000');
+      allowed.add('http://127.0.0.1:4000');
+    }
+    return allowed.has(url.origin) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<LoginValues>({
@@ -29,7 +51,14 @@ export function LoginPage() {
     setServerError(null);
     try {
       await login(values);
-      navigate('/app', { replace: true });
+
+      const next = safeNext(searchParams.get('next'));
+      if (next) {
+        // OAuth authorize paths are served by the API, not the SPA router.
+        window.location.assign(next);
+      } else {
+        navigate('/app', { replace: true });
+      }
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Unable to sign in right now.';
       setServerError(message);
