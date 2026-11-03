@@ -5,6 +5,7 @@ import { env } from '../env';
 import { AppError } from '../errors';
 import { configuredOrigins } from '../lib/origins';
 import { verifySession } from './jwt';
+import { readAccessToken } from './oauth';
 import type { AuthUser } from './types';
 
 function useSecureCookies(): boolean {
@@ -34,12 +35,22 @@ export function clearSessionCookie(res: Response): void {
 }
 
 export const requireAuth: RequestHandler = async (req, _res, next) => {
-  const token = req.cookies?.[SESSION_COOKIE];
-  if (typeof token !== 'string' || !token) {
+  const authorization = req.headers.authorization;
+  const bearer =
+    typeof authorization === 'string' && authorization.startsWith('Bearer ')
+      ? authorization.slice('Bearer '.length).trim()
+      : '';
+  const cookieToken = req.cookies?.[SESSION_COOKIE];
+  const token = bearer || (typeof cookieToken === 'string' ? cookieToken : '');
+
+  if (!token) {
     throw new AppError(401, 'UNAUTHENTICATED', 'Please sign in.');
   }
 
-  const userId = await verifySession(token);
+  const userId = bearer
+    ? ((await readAccessToken(bearer))?.sub ?? null)
+    : await verifySession(token);
+
   if (!userId) {
     throw new AppError(401, 'UNAUTHENTICATED', 'Your session has expired. Please sign in again.');
   }

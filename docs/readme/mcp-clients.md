@@ -7,11 +7,53 @@ slug: mcp-clients
 privacy:
   view: public
 content:
-  excerpt: Copy-paste configurations for Claude Code, Claude Desktop, Cursor, Codex, Hermes Agent, and any other stdio MCP client.
+  excerpt: Connect Hermes Agent over HTTP OAuth, or use the stdio server with Claude Code, Claude Desktop, Cursor, and Codex.
 ---
 
-The MCP server is a **stdio** server: your client launches `node apps/mcp/dist/index.js` and talks
-JSON-RPC over stdin/stdout. Build it first:
+The MCP server supports two transports:
+
+| Mode                        | Best for                                                              | Endpoint                       |
+| :-------------------------- | :-------------------------------------------------------------------- | :----------------------------- |
+| **Streamable HTTP + OAuth** | Hermes Agent, hosted clients, or anything that cannot spawn a process | `https://your-app.example/mcp` |
+| **stdio**                   | A client on the same machine that can launch Node                     | `node apps/mcp/dist/index.js`  |
+
+The HTTP endpoint exposes **36 tools**. It omits `login`, `register_account`, and `logout` because
+the OAuth access token already identifies the user. The stdio server exposes all **39**.
+
+## Remote HTTP with OAuth
+
+This is the recommended setup for Hermes Agent. Add the endpoint to `~/.hermes/config.yaml`:
+
+```yaml
+mcp_servers:
+  kanban:
+    url: 'https://kanban-board-p4kk.onrender.com/mcp'
+    auth: oauth
+```
+
+Hermes discovers the OAuth metadata at `/.well-known/oauth-protected-resource`, registers a client,
+and opens a browser. If you are not signed in to Kanban, it sends you to the login page first; then
+it shows a consent screen. Approve it once. Hermes stores the access and refresh tokens and renews
+them automatically.
+
+Notes:
+
+- No `KANBAN_USERNAME`, password, or API key is needed.
+- The MCP server discovers and protects `https://kanban-board-p4kk.onrender.com/mcp`; the deployed
+  app must include this feature. If `/mcp` returns `404`, deploy the latest `main`.
+- `PUBLIC_URL` (or the first `CLIENT_ORIGIN` in production) must be the app's public **HTTPS**
+  origin. It is used in the OAuth metadata and consent redirects.
+- On a headless host, run `hermes mcp login kanban`. Hermes prints the authorization URL and
+  supports its paste-back flow when the loopback callback cannot reach the browser.
+- After editing the config, run `/reload-mcp`; Hermes prefixes the tools as
+  `mcp__kanban__whoami`, `mcp__kanban__get_board`, and so on.
+
+> 📘 The OAuth endpoint is the same Render service as the app. There is no separate MCP deployment
+> to run.
+
+## Local stdio clients
+
+Build the server once:
 
 ```bash
 pnpm --filter @kanban/mcp build
@@ -24,7 +66,7 @@ For the deployed app, set `KANBAN_API_URL` to `https://kanban-board-p4kk.onrende
 `http://localhost:4000`. On Render's free tier, the first request after an idle period can take
 30–60 seconds to wake the service; the MCP client waits up to 60 seconds for it.
 
-## Claude Code
+### Claude Code
 
 The repository ships `.mcp.json`, so opening the project in Claude Code offers the `kanban` server
 automatically. Approve it once when prompted.
@@ -37,7 +79,7 @@ claude mcp add kanban \
   -- node /absolute/path/to/taskboard/apps/mcp/dist/index.js
 ```
 
-## Claude Desktop
+### Claude Desktop
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, or
 `%APPDATA%\Claude\claude_desktop_config.json` on Windows:
@@ -58,7 +100,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS,
 }
 ```
 
-## Cursor
+### Cursor
 
 Use `.cursor/mcp.json` for a project, or `~/.cursor/mcp.json` globally:
 
@@ -74,7 +116,7 @@ Use `.cursor/mcp.json` for a project, or `~/.cursor/mcp.json` globally:
 }
 ```
 
-## Codex CLI
+### Codex CLI
 
 In `~/.codex/config.toml`:
 
@@ -85,10 +127,9 @@ args = ["/absolute/path/to/taskboard/apps/mcp/dist/index.js"]
 env = { KANBAN_API_URL = "http://localhost:4000" }
 ```
 
-## Hermes Agent
+### Hermes Agent (stdio alternative)
 
-Hermes Agent reads MCP servers from `~/.hermes/config.yaml`. It supports local stdio servers, so
-point it at the built entrypoint and the deployed API:
+If Hermes runs on the same machine as the repository and you prefer stdio:
 
 ```yaml
 mcp_servers:
@@ -103,15 +144,9 @@ mcp_servers:
     connect_timeout: 60
 ```
 
-Put the two credentials in `~/.hermes/.env`, or remove those lines and ask Hermes to call the
-`login` tool once. Reload the configuration with `/reload-mcp` after editing it.
+Put the credentials in `~/.hermes/.env`, or remove them and call the `login` tool once.
 
-Hermes prefixes the tools as `mcp__kanban__whoami`, `mcp__kanban__get_board`, and so on.
-
-> 📘 Hermes also supports remote HTTP MCP servers via `url:`, but this server currently speaks
-> only stdio. Run it on the machine where Hermes runs, with network access to the Kanban API.
-
-## Other stdio clients
+### Other stdio clients
 
 Launch `node <repo>/apps/mcp/dist/index.js` with `KANBAN_API_URL` in the environment. All
 diagnostics go to stderr, so stdout stays clean for the protocol.
@@ -125,7 +160,7 @@ node apps/mcp/dist/index.js \
   --password your-password
 ```
 
-## Authenticate once
+## Authenticate a stdio client
 
 If your client config does not include `KANBAN_USERNAME` and `KANBAN_PASSWORD`, ask the AI to call
 the `login` tool. The session is cached in `~/.kanban-mcp/session.json` and reused on later runs.
@@ -139,18 +174,37 @@ the `login` tool. The session is cached in `~/.kanban-mcp/session.json` and reus
 2. Ask it to call `whoami` or `list_workplaces`.
 3. Ask for the board: "Show me the board" should call `get_board`.
 
-If your client lists tools but calls fail, check that the API is running and that `KANBAN_API_URL`
-points at it.
+For HTTP, a `401` on the first call is expected: Hermes starts the OAuth flow.
 
 ## Troubleshooting
 
-### The server does not appear in my client
+### `/mcp` returns 404
+
+The deployed service does not include the HTTP endpoint yet. Merge and redeploy the latest `main`,
+then retry.
+
+### OAuth metadata or consent fails
+
+Check that `PUBLIC_URL` (or the first `CLIENT_ORIGIN`) is the exact public HTTPS origin, with no
+trailing slash. The app must be reachable at that origin for the browser consent redirect.
+
+### The browser keeps returning to the login page
+
+The consent request needs the `kanban_session` cookie. Make sure the app and OAuth endpoint share
+the same origin, and that you are signed in at that origin before approving.
+
+### Only 36 tools appear over HTTP
+
+That is expected. `login`, `register_account`, and `logout` are stdio-only; the OAuth token already
+identifies the user.
+
+### The stdio server does not appear in my client
 
 - Rebuild `apps/mcp` and confirm `apps/mcp/dist/index.js` exists.
 - Confirm the path in the config is absolute (except for Claude Code's project `.mcp.json`).
 - Restart the client fully; most only read MCP configuration at startup.
 
-### The server starts but every tool reports a connection error
+### The stdio server starts but every tool reports a connection error
 
 Start the API (`pnpm dev:api`) and check `KANBAN_API_URL`. A deployed API needs its public HTTPS
 origin, not `localhost`.
@@ -159,8 +213,3 @@ origin, not `localhost`.
 
 Your client cannot find Node on its `PATH`. Use the absolute path to the Node binary in the
 `command` field, or install Node 22+ system-wide.
-
-### Tools work for me but not for a teammate
-
-Each person signs in as their own Kanban user. The MCP server never shares a session between
-machines; run `login` on each one.

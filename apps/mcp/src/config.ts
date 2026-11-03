@@ -12,6 +12,11 @@ export interface McpConfig {
   password?: string;
   /** Raw `kanban_session` cookie (or a full `name=value` pair), for hosts that inject it. */
   sessionToken?: string;
+  /**
+   * OAuth access token for the remote /mcp transport. When set, the client sends
+   * `Authorization: Bearer …` instead of a session cookie and never signs in.
+   */
+  bearerToken?: string;
   /** Where the session cookie is cached between runs; `null` disables persistence. */
   sessionFile: string | null;
   /** Used when a tool call omits `workplaceId`. */

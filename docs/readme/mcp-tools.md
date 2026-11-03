@@ -7,11 +7,13 @@ slug: mcp-tools
 privacy:
   view: public
 content:
-  excerpt: All 39 tools the MCP server exposes — account, workplaces, the board, cards, checklists, comments, tags, and invitations.
+  excerpt: All 39 stdio tools (36 over HTTP OAuth) — account, workplaces, the board, cards, checklists, comments, tags, and invitations.
 ---
 
-The MCP server exposes 39 tools. Most accept an optional `workplaceId`; omit it when you belong to
-one workplace, or set `KANBAN_WORKPLACE_ID`.
+The stdio server exposes 39 tools. The HTTP OAuth endpoint exposes 36: `login`,
+`register_account`, and `logout` are omitted because the access token identifies the user. Most
+tools accept an optional `workplaceId`; omit it when you belong to one workplace, or set
+`KANBAN_WORKPLACE_ID`.
 
 Tool names are stable. Column tools accept a column name as an alternative to a UUID, tag tools
 accept tag names, and assignee tools accept usernames, so the model rarely needs to handle IDs by

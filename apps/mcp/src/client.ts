@@ -385,6 +385,7 @@ export class KanbanApiClient {
   // ------------------------------------------------------------- plumbing
 
   private async ensureSession(): Promise<void> {
+    if (this.config.bearerToken) return;
     if (this.cookie) return;
 
     if (this.config.sessionToken && !this.sessionTokenDisabled) {
@@ -422,6 +423,13 @@ export class KanbanApiClient {
 
       if (response.status === 401 && !reauthAttempted) {
         reauthAttempted = true;
+
+        if (this.config.bearerToken) {
+          throw new Error(
+            'The Kanban API rejected the OAuth access token. Reconnect the MCP client to refresh it.',
+          );
+        }
+
         this.cookie = undefined;
         this.store.clear();
 
@@ -453,7 +461,8 @@ export class KanbanApiClient {
     const headers: Record<string, string> = { Accept: 'application/json' };
 
     if (body !== undefined) headers['Content-Type'] = 'application/json';
-    if (cookie) headers.Cookie = cookie;
+    if (this.config.bearerToken) headers.Authorization = `Bearer ${this.config.bearerToken}`;
+    else if (cookie) headers.Cookie = cookie;
 
     try {
       return await fetch(`${this.apiUrl}/api${path}`, {

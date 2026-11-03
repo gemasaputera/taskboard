@@ -9,8 +9,12 @@ import { registerSubtaskTools } from './subtasks.js';
 import { registerTagTools } from './tags.js';
 import { registerWorkplaceTools } from './workplaces.js';
 
-export function registerTools(server: McpServer, client: KanbanApiClient): void {
-  registerAuthTools(server, client);
+export function registerTools(
+  server: McpServer,
+  client: KanbanApiClient,
+  options: { authTools?: boolean } = {},
+): void {
+  registerAuthTools(server, client, options.authTools ?? true);
   registerWorkplaceTools(server, client);
   registerBoardTools(server, client);
   registerCardTools(server, client);
