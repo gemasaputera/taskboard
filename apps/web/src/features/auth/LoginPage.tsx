@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { ApiError } from '../../lib/api';
+import { useSeo } from '../../lib/seo';
 import { useAuth } from './AuthProvider';
 import { AuthShell } from './AuthShell';
 
@@ -37,6 +38,12 @@ function safeNext(value: string | null): string | null {
 }
 
 export function LoginPage() {
+  useSeo({
+    title: 'Sign in · Kanban',
+    description: 'Sign in to your Kanban workplace to pick up the board where you left off.',
+    path: '/login',
+  });
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

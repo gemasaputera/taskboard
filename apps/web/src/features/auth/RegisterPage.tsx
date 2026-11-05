@@ -16,6 +16,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { ApiError } from '../../lib/api';
+import { useSeo } from '../../lib/seo';
 import { useAuth } from './AuthProvider';
 import { AuthShell } from './AuthShell';
 import { AvailabilityHint } from './AvailabilityHint';
@@ -59,6 +60,13 @@ function normalizeEmail(value: string): string {
 }
 
 export function RegisterPage() {
+  useSeo({
+    title: 'Create an account · Kanban',
+    description:
+      'Create a Kanban account — a workplace with four lanes is ready as soon as you register.',
+    path: '/register',
+  });
+
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);

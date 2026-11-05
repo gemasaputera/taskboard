@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Kanban — Free Kanban Board for Small Teams &amp; AI Agents</title>
+    <meta
+      name="description"
+      content="A free, open-source kanban board for teams of 2–10. Four lanes, Markdown cards, realtime sync, and 39 MCP tools so AI agents can work the board."
+    />
+    <link rel="canonical" href="https://kanban-board-p4kk.onrender.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#1c1917" />
+    <meta name="author" content="gemasaputera" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kanban" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://kanban-board-p4kk.onrender.com/" />
+    <meta property="og:title" content="Kanban — a live board for small teams" />
+    <meta
+      property="og:description"
+      content="Four lanes, Markdown cards, realtime sync, and 39 MCP tools for AI agents. Free and MIT-licensed."
+    />
+    <meta property="og:image" content="https://kanban-board-p4kk.onrender.com/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Kanban — the board your team actually keeps in sync. Four lanes, realtime sync, 39 MCP tools."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kanban — a live board for small teams" />
+    <meta
+      name="twitter:description"
+      content="Four lanes, Markdown cards, realtime sync, and 39 MCP tools for AI agents. Free and MIT-licensed."
+    />
+    <meta name="twitter:image" content="https://kanban-board-p4kk.onrender.com/og.png" />
+    <meta name="twitter:image:alt" content="Kanban — the board your team actually keeps in sync." />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://kanban-board-p4kk.onrender.com/#organization",
+        "name": "Kanban",
+        "url": "https://kanban-board-p4kk.onrender.com/",
+        "logo": "https://kanban-board-p4kk.onrender.com/icon-512.png",
+        "description": "Kanban is a free, open-source task board for small teams, with an MCP server for AI clients.",
+        "sameAs": ["https://github.com/gemasaputera/taskboard"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://kanban-board-p4kk.onrender.com/#website",
+        "url": "https://kanban-board-p4kk.onrender.com/",
+        "name": "Kanban",
+        "description": "A free, open-source kanban board for small teams of 2–10, with realtime sync and 39 MCP tools for AI agents.",
+        "inLanguage": "en",
+        "publisher": {
+          "@id": "https://kanban-board-p4kk.onrender.com/#organization"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "@id": "https://kanban-board-p4kk.onrender.com/#app",
+        "name": "Kanban",
+        "url": "https://kanban-board-p4kk.onrender.com/",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Project Management",
+        "operatingSystem": "Web",
+        "browserRequirements": "Requires JavaScript. Modern browsers with support for ES2022.",
+        "description": "A free, open-source kanban board for teams of 2–10 people. Four default lanes, Markdown cards with checklists, tags, assignees and comments, realtime sync over Socket.IO, and an MCP server with 39 tools for AI agents.",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "license": "https://opensource.org/license/mit",
+        "screenshot": "https://kanban-board-p4kk.onrender.com/board.png",
+        "sameAs": ["https://github.com/gemasaputera/taskboard"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "featureList": [
+          "Four default lanes: To Do, Revision, On Progress, Done",
+          "Owner-controlled columns: rename, reorder, hide, add, delete",
+          "Markdown cards with checklist subtasks, tags, assignees, and comments",
+          "Drag and drop with mouse, touch, and keyboard",
+          "Realtime sync with Socket.IO",
+          "In-app invitations by username or email",
+          "MCP server: 39 tools over stdio, 36 over Streamable HTTP with OAuth",
+          "Self-hosting with Docker or any Node 22+ host and PostgreSQL"
+        ],
+        "publisher": {
+          "@id": "https://kanban-board-p4kk.onrender.com/#organization"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "@id": "https://kanban-board-p4kk.onrender.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Kanban?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Kanban is a free, open-source task board for small teams. It gives each account a workplace with four lanes — To Do, Revision, On Progress, Done — and cards that carry Markdown descriptions, checklists, tags, assignees, and comments. It is built for teams of 2–10 people, not enterprise portfolio management."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Kanban free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The source code is MIT-licensed, so self-hosting carries no license fee. The hosted instance is free to sign up for. You provide your own PostgreSQL database if you self-host."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can AI assistants use the board?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. An MCP server exposes the board as 39 tools over stdio or 36 tools over Streamable HTTP with OAuth. Claude, Cursor, Codex, Hermes Agent, or any MCP client can read boards, create and move cards, manage checklists, comments, tags, assignees, columns, members, and invitations. Changes appear live in the web app."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is Kanban different from Trello?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Kanban is purpose-built for small teams: one workplace with four default lanes instead of a general-purpose board builder, owner-controlled structure, in-app invitations, and an MCP server that lets AI agents work the same board as people. It is MIT-licensed and self-hostable."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How many people can join a workplace?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Kanban is designed for teams of 2–10 people. The owner invites an already-registered user by exact username or email, and the invitee accepts or declines in the app. Owners manage structure, invitations, members, and tags; members work on cards."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to self-host Kanban?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. A hosted instance is available at https://kanban-board-p4kk.onrender.com. Self-hosting is optional and supported through Docker, Render, Railway, Fly.io, or any Node 22+ host with PostgreSQL."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does drag and drop work on mobile and with a keyboard?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Cards move with mouse, touch, and keyboard through dnd-kit. The card dialog also includes a Move to… menu for a non-drag path, and every control has a visible focus ring."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is realtime collaboration included?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Socket.IO keeps every member's board in sync. Drag changes are applied optimistically, committed by the server, and rolled back with a toast if the request fails. Reconnecting clients refetch on reconnect and on window focus."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <link rel="stylesheet" href="/src/landing.css" />
+  </head>
+  <body class="bg-canvas text-ink">
+    <a
+      href="#main"
+      class="sr-only-focusable rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white"
+      >Skip to content</a
+    >
+
+    <header class="border-b border-line bg-surface">
+      <div
+        class="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-10"
+      >
+        <a
+          href="/"
+          class="flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          aria-label="Kanban home"
+        >
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-sm font-bold text-white"
+            >K</span
+          >
+          <span class="text-[15px] font-semibold tracking-tight">Kanban</span>
+        </a>
+
+        <nav class="hidden items-center gap-7 text-sm text-muted md:flex" aria-label="Main">
+          <a class="transition-colors hover:text-ink" href="#features">Features</a>
+          <a class="transition-colors hover:text-ink" href="#ai">AI &amp; MCP</a>
+          <a class="transition-colors hover:text-ink" href="#how-it-works">How it works</a>
+          <a class="transition-colors hover:text-ink" href="#faq">FAQ</a>
+          <a
+            class="transition-colors hover:text-ink"
+            href="https://kanbantask.readme.io/docs/welcome"
+            >Docs <span aria-hidden="true">↗</span></a
+          >
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <a
+            href="/login"
+            class="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >Sign in</a
+          >
+          <a
+            href="/register"
+            class="inline-flex h-9 items-center rounded-lg bg-accent px-3.5 text-sm font-medium text-white transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
+            >Start free</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="border-b border-line">
+        <div
+          class="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-10 lg:grid-cols-[1.02fr_1fr] lg:items-center lg:gap-16 lg:py-24"
+        >
+          <div>
+            <p class="eyebrow">Kanban for small teams · MIT licensed</p>
+            <h1
+              class="mt-4 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-5xl"
+            >
+              A kanban board for small teams that stays in sync
+            </h1>
+            <p class="lede mt-5">
+              Kanban is a free, open-source task board for teams of 2–10 people. Every account gets
+              a workplace with four lanes — To Do, Revision, On Progress, and Done — where cards
+              carry Markdown descriptions, checklists, colored tags, assignees, and comments.
+              Socket.IO keeps every board in sync, and an MCP server lets AI agents work the same
+              cards.
+            </p>
+
+            <div class="mt-8 flex flex-wrap items-center gap-3">
+              <a class="btn-primary" href="/register">Create your board</a>
+              <a class="btn-secondary" href="#how-it-works">See how it works</a>
+            </div>
+
+            <ul class="mt-8 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[13px] text-muted">
+              <li class="flex items-center gap-2">
+                <span class="dot" aria-hidden="true"></span> Four default lanes
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="dot" aria-hidden="true"></span> Realtime over Socket.IO
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="dot" aria-hidden="true"></span> 39 MCP tools for AI agents
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="dot" aria-hidden="true"></span> Self-host with Docker
+              </li>
+            </ul>
+          </div>
+
+          <figure class="hero-figure">
+            <picture>
+              <source srcset="/board.webp" type="image/webp" />
+              <img
+                src="/board.png"
+                width="1440"
+                height="900"
+                fetchpriority="high"
+                decoding="async"
+                alt="The Kanban board: four lanes labelled To Do, Revision, On Progress, and Done, with cards showing tags, subtask progress, and comment counts."
+              />
+            </picture>
+            <figcaption>
+              The whole board at a glance — lanes, counts, tags, checklist progress, and who is
+              working on what.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="features" class="border-b border-line bg-surface">
+        <div class="mx-auto w-full max-w-6xl px-5 py-16 sm:px-10 lg:py-20">
+          <p class="eyebrow">Features</p>
+          <h2 class="section-title">Everything a small team needs on one board</h2>
+          <p class="lede mt-4 max-w-2xl">
+            Kanban covers the work without adding another tool to administer: structure the owner
+            controls, cards that hold the whole task, and live updates for everyone in the
+            workplace.
+          </p>
+
+          <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="feature-card">
+              <h3>Four lanes, shaped by the owner</h3>
+              <p>
+                Every workplace starts with To Do, Revision, On Progress, and Done. Owners rename,
+                reorder, hide, add, and delete lanes; deleting a lane moves its cards to the first
+                visible remaining lane instead of destroying them.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <h3>Cards that hold the whole task</h3>
+              <p>
+                Write the description in Markdown with a Write/Preview editor, then break it into
+                checklist subtasks with progress, add multiple colored tags and assignees, and keep
+                the conversation in a threaded comment list.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <h3>Drag and drop on any input</h3>
+              <p>
+                Move cards with a mouse, a finger, or the keyboard through dnd-kit. Updates are
+                optimistic, the server owns the final ordering, and a card's position survives a
+                reload.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <h3>Live for everyone</h3>
+              <p>
+                Socket.IO pushes changes to every open board in the workplace. If a client drops its
+                connection, it refetches on reconnect and on window focus so nobody works from stale
+                lanes.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <h3>Invitations and clear roles</h3>
+              <p>
+                The owner invites an already-registered teammate by exact username or email; the
+                invitee accepts or declines in the app. Owners manage structure, members, and tags —
+                members move and discuss work.
+              </p>
+            </article>
+
+            <article class="feature-card">
+              <h3>A board AI can work on</h3>
+              <p>
+                An MCP server exposes the board as 39 tools over stdio or 36 over Streamable HTTP
+                with OAuth. Claude, Cursor, Codex, or Hermes Agent can create, move, and update work
+                without opening a browser.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="border-b border-line">
+        <div class="mx-auto w-full max-w-6xl px-5 py-16 sm:px-10 lg:py-20">
+          <p class="eyebrow">How it works</p>
+          <h2 class="section-title">From sign-up to a moving board in three steps</h2>
+          <p class="lede mt-4 max-w-2xl">
+            There is no setup wizard and no empty workspace to configure. Register, shape the lanes
+            to match how your team works, then move the first card.
+          </p>
+
+          <ol class="mt-10 grid gap-4 md:grid-cols-3">
+            <li class="step-card">
+              <span class="step-number">01</span>
+              <h3>Register an account</h3>
+              <p>
+                Usernames and emails are checked live against the database, and a strength meter
+                enforces a 8+ character password with mixed case, a number, and a symbol. Your
+                workplace and four lanes are created immediately.
+              </p>
+            </li>
+            <li class="step-card">
+              <span class="step-number">02</span>
+              <h3>Shape the board and invite the team</h3>
+              <p>
+                Rename or reorder the lanes, hide the ones you do not use, and add lanes for your
+                process. Invite teammates by username or email; they accept from the bell and appear
+                on the board right away.
+              </p>
+            </li>
+            <li class="step-card">
+              <span class="step-number">03</span>
+              <h3>Move work forward</h3>
+              <p>
+                Add a card, describe it in Markdown, break it into checklist items, tag and assign
+                it, then drag it across lanes. Everyone sees the move live, and AI clients can work
+                the same cards through the MCP server.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="ai" class="bg-ink text-white">
+        <div
+          class="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:py-20"
+        >
+          <div>
+            <p class="eyebrow-dark">AI &amp; MCP</p>
+            <h2 class="mt-4 text-3xl font-semibold leading-[1.1] tracking-[-0.03em] sm:text-4xl">
+              Can AI agents work on your board?
+            </h2>
+            <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-white/65">
+              Yes. Kanban ships an MCP server that exposes the board as 39 tools over stdio, or 36
+              tools over Streamable HTTP with OAuth. Claude, Cursor, Codex, Hermes Agent, or any MCP
+              client can read boards and create, move, and update cards, checklists, comments, tags,
+              assignees, columns, members, and invitations.
+            </p>
+            <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-white/65">
+              The MCP server drives the same REST API as the web app, so permissions, ordering, and
+              realtime updates behave identically. A card moved by an agent appears live in every
+              open browser.
+            </p>
+
+            <div class="mt-8 grid max-w-md grid-cols-3 gap-4">
+              <div class="stat">
+                <span class="stat-value">39</span>
+                <span class="stat-label">MCP tools over stdio</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">36</span>
+                <span class="stat-label">tools over HTTP + OAuth</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">1</span>
+                <span class="stat-label">API behind both</span>
+              </div>
+            </div>
+
+            <p class="mt-8">
+              <a
+                class="inline-flex items-center gap-2 text-sm font-medium text-white/80 underline decoration-white/25 underline-offset-4 transition-colors hover:text-white"
+                href="https://kanbantask.readme.io/docs/mcp"
+                >Read the MCP setup guide <span aria-hidden="true">↗</span></a
+              >
+            </p>
+          </div>
+
+          <div class="min-w-0">
+            <div class="code-card">
+              <p class="code-card-title">Remote MCP client configuration</p>
+              <pre><code>mcp_servers:
+  kanban:
+    url: "https://kanban-board-p4kk.onrender.com/mcp"
+    auth: oauth</code></pre>
+            </div>
+            <div class="mt-4 overflow-hidden rounded-xl border border-white/10">
+              <table class="w-full text-left text-[13px]">
+                <caption class="sr-only">
+                  MCP transports, tool counts, and when to use each
+                </caption>
+                <thead
+                  class="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/40"
+                >
+                  <tr>
+                    <th scope="col" class="px-4 py-2.5">Transport</th>
+                    <th scope="col" class="px-4 py-2.5">Tools</th>
+                    <th scope="col" class="px-4 py-2.5">Use when</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10 text-white/70">
+                  <tr>
+                    <th scope="row" class="px-4 py-3 font-medium text-white">stdio</th>
+                    <td class="px-4 py-3">39</td>
+                    <td class="px-4 py-3">The client can launch Node locally</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" class="px-4 py-3 font-medium text-white">HTTP + OAuth</th>
+                    <td class="px-4 py-3">36</td>
+                    <td class="px-4 py-3">Hosted clients, or anything without Node</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="border-b border-line bg-surface">
+        <div class="mx-auto w-full max-w-6xl px-5 py-16 sm:px-10 lg:py-20">
+          <p class="eyebrow">At a glance</p>
+          <h2 class="section-title">Kanban facts, without the marketing fog</h2>
+          <p class="lede mt-4 max-w-2xl">
+            The specifics an evaluator usually asks for: who it is for, what is included, how it
+            runs, and what it costs.
+          </p>
+
+          <div class="mt-8 overflow-hidden rounded-xl border border-line">
+            <table class="facts-table">
+              <caption class="sr-only">
+                Kanban product facts: audience, board, cards, realtime, AI access, hosting, license,
+                and stack
+              </caption>
+              <tbody>
+                <tr>
+                  <th scope="row">Best for</th>
+                  <td>Product, design, and freelance teams of 2–10 people</td>
+                </tr>
+                <tr>
+                  <th scope="row">Default board</th>
+                  <td>Four owner-controlled lanes: To Do, Revision, On Progress, Done</td>
+                </tr>
+                <tr>
+                  <th scope="row">Cards</th>
+                  <td>
+                    Markdown description, checklist subtasks with progress, colored tags, multiple
+                    assignees, threaded comments
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Realtime</th>
+                  <td>Socket.IO sync with optimistic updates and server-owned ordering</td>
+                </tr>
+                <tr>
+                  <th scope="row">AI access</th>
+                  <td>MCP server: 39 tools over stdio, 36 over Streamable HTTP with OAuth</td>
+                </tr>
+                <tr>
+                  <th scope="row">Hosting</th>
+                  <td>
+                    Hosted app, or self-host with Docker, Render, Railway, Fly.io, or Node 22+ and
+                    PostgreSQL
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">License</th>
+                  <td>MIT — free to use, change, and self-host</td>
+                </tr>
+                <tr>
+                  <th scope="row">Stack</th>
+                  <td>
+                    React 19, Vite, TypeScript, TanStack Query, dnd-kit, Tailwind v4, Express 5,
+                    Prisma, PostgreSQL
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="self-host" class="border-b border-line">
+        <div
+          class="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-10 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-16 lg:py-20"
+        >
+          <div>
+            <p class="eyebrow">Self-hosting</p>
+            <h2 class="section-title">Self-host it in one container</h2>
+            <p class="lede mt-4">
+              Kanban is MIT-licensed and ships a Dockerfile that builds the web app and API, applies
+              database migrations, and starts the server. You need PostgreSQL and three environment
+              variables: <code class="inline-code">DATABASE_URL</code>,
+              <code class="inline-code">JWT_SECRET</code>, and
+              <code class="inline-code">CLIENT_ORIGIN</code>.
+            </p>
+            <ul class="mt-6 space-y-2.5 text-sm text-muted">
+              <li class="flex gap-2.5">
+                <span class="dot mt-2" aria-hidden="true"></span>
+                Node 22+ and PostgreSQL (Neon or a local Docker Postgres)
+              </li>
+              <li class="flex gap-2.5">
+                <span class="dot mt-2" aria-hidden="true"></span>
+                Works on Render, Railway, Fly.io, a VPS, or a single Docker host
+              </li>
+              <li class="flex gap-2.5">
+                <span class="dot mt-2" aria-hidden="true"></span>
+                Scrypt password hashing, httpOnly 7-day sessions, helmet CSP, and rate limits on
+                auth
+              </li>
+            </ul>
+            <p class="mt-6">
+              <a class="link-arrow" href="https://kanbantask.readme.io/docs/deployment"
+                >Deployment guide <span aria-hidden="true">↗</span></a
+              >
+            </p>
+          </div>
+
+          <div class="code-card code-card-light">
+            <p class="code-card-title">Run the published image</p>
+            <pre><code>docker build -t kanban-board .
+
+docker run -d --name kanban -p 4000:4000 \
+  -e DATABASE_URL="postgresql://...pooler..." \
+  -e DATABASE_URL_UNPOOLED="postgresql://..." \
+  -e JWT_SECRET="&lt;32+ random characters&gt;" \
+  -e CLIENT_ORIGIN="https://your-domain.example" \
+  kanban-board</code></pre>
+            <p class="code-card-note">Then point a reverse proxy at port 4000 for TLS.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="border-b border-line bg-surface">
+        <div class="mx-auto w-full max-w-6xl px-5 py-16 sm:px-10 lg:py-20">
+          <p class="eyebrow">FAQ</p>
+          <h2 class="section-title">Questions teams ask before switching</h2>
+          <p class="lede mt-4 max-w-2xl">
+            Short, direct answers about cost, AI access, comparisons, team size, and hosting.
+          </p>
+
+          <div class="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2">
+            <article>
+              <h3 class="faq-q">What is Kanban?</h3>
+              <p class="faq-a">
+                Kanban is a free, open-source task board for small teams. It gives each account a
+                workplace with four lanes — To Do, Revision, On Progress, Done — and cards that
+                carry Markdown descriptions, checklists, tags, assignees, and comments. It is built
+                for teams of 2–10 people, not enterprise portfolio management.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">Is Kanban free to use?</h3>
+              <p class="faq-a">
+                Yes. The source code is MIT-licensed, so self-hosting carries no license fee. The
+                hosted instance is free to sign up for. You provide your own PostgreSQL database if
+                you self-host.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">Can AI assistants use the board?</h3>
+              <p class="faq-a">
+                Yes. An MCP server exposes the board as 39 tools over stdio or 36 tools over
+                Streamable HTTP with OAuth. Claude, Cursor, Codex, Hermes Agent, or any MCP client
+                can read boards, create and move cards, manage checklists, comments, tags,
+                assignees, columns, members, and invitations. Changes appear live in the web app.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">How is Kanban different from Trello?</h3>
+              <p class="faq-a">
+                Kanban is purpose-built for small teams: one workplace with four default lanes
+                instead of a general-purpose board builder, owner-controlled structure, in-app
+                invitations, and an MCP server that lets AI agents work the same board as people. It
+                is MIT-licensed and self-hostable.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">How many people can join a workplace?</h3>
+              <p class="faq-a">
+                Kanban is designed for teams of 2–10 people. The owner invites an already-registered
+                user by exact username or email, and the invitee accepts or declines in the app.
+                Owners manage structure, invitations, members, and tags; members work on cards.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">Do I need to self-host Kanban?</h3>
+              <p class="faq-a">
+                No. A hosted instance is available at
+                <a class="faq-link" href="https://kanban-board-p4kk.onrender.com/"
+                  >kanban-board-p4kk.onrender.com</a
+                >. Self-hosting is optional and supported through Docker, Render, Railway, Fly.io,
+                or any Node 22+ host with PostgreSQL.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">Does drag and drop work on mobile and with a keyboard?</h3>
+              <p class="faq-a">
+                Yes. Cards move with mouse, touch, and keyboard through dnd-kit. The card dialog
+                also includes a Move to… menu for a non-drag path, and every control has a visible
+                focus ring.
+              </p>
+            </article>
+
+            <article>
+              <h3 class="faq-q">Is realtime collaboration included?</h3>
+              <p class="faq-a">
+                Yes. Socket.IO keeps every member's board in sync. Drag changes are applied
+                optimistically, committed by the server, and rolled back with a toast if the request
+                fails. Reconnecting clients refetch on reconnect and on window focus.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-surface">
+        <div class="mx-auto w-full max-w-6xl px-5 py-16 sm:px-10 lg:py-20">
+          <div class="rounded-2xl border border-line bg-canvas px-6 py-10 text-center sm:px-12">
+            <h2 class="text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">
+              Start with four lanes and an empty board
+            </h2>
+            <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted">
+              Registering creates your workplace, its lanes, and a board you can share in under a
+              minute. No credit card, no setup wizard.
+            </p>
+            <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <a class="btn-primary" href="/register">Create your account</a>
+              <a class="btn-secondary" href="/login">Sign in to an existing board</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-line bg-surface">
+      <div
+        class="mx-auto grid w-full max-w-6xl gap-9 px-5 py-10 sm:px-10 lg:grid-cols-[1.4fr_repeat(3,1fr)] lg:gap-12 lg:px-16"
+      >
+        <div class="max-w-xs">
+          <a href="/" class="inline-flex items-center gap-2.5" aria-label="Kanban home">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-sm font-bold text-white"
+              >K</span
+            >
+            <span class="text-[15px] font-semibold tracking-tight">Kanban</span>
+          </a>
+          <p class="mt-3 text-sm leading-relaxed text-muted">
+            One workplace, four clear lanes, and every task moving live with the people who care
+            about it.
+          </p>
+        </div>
+
+        <nav class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-3" aria-label="Footer">
+          <div>
+            <h2 class="footer-heading">Product</h2>
+            <ul class="mt-3 space-y-2.5 text-sm">
+              <li><a class="footer-link" href="#features">Features</a></li>
+              <li><a class="footer-link" href="#ai">AI &amp; MCP</a></li>
+              <li><a class="footer-link" href="#faq">FAQ</a></li>
+              <li><a class="footer-link" href="/register">Create an account</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2 class="footer-heading">Resources</h2>
+            <ul class="mt-3 space-y-2.5 text-sm">
+              <li>
+                <a class="footer-link" href="https://kanbantask.readme.io/docs/quickstart"
+                  >Quick start</a
+                >
+              </li>
+              <li>
+                <a class="footer-link" href="https://kanbantask.readme.io/docs/mcp">MCP server</a>
+              </li>
+              <li>
+                <a class="footer-link" href="https://kanbantask.readme.io/docs/rest-api"
+                  >REST API</a
+                >
+              </li>
+              <li>
+                <a class="footer-link" href="https://kanbantask.readme.io/docs/deployment"
+                  >Deployment</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h2 class="footer-heading">Project</h2>
+            <ul class="mt-3 space-y-2.5 text-sm">
+              <li>
+                <a class="footer-link" href="https://github.com/gemasaputera/taskboard">GitHub</a>
+              </li>
+              <li>
+                <a class="footer-link" href="https://github.com/gemasaputera/taskboard/issues"
+                  >Report an issue</a
+                >
+              </li>
+              <li>
+                <a
+                  class="footer-link"
+                  href="https://github.com/gemasaputera/taskboard/blob/main/LICENSE"
+                  >License</a
+                >
+              </li>
+              <li><a class="footer-link" href="/llms.txt">llms.txt</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div class="border-t border-line">
+        <div
+          class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-4 text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16"
+        >
+          <p>© 2026 Kanban. MIT licensed.</p>
+          <p>Last updated 5 November 2026 · Built for small teams</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

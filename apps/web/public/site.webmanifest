@@ -1,0 +1,14 @@
+{
+  "name": "Kanban — a live team board",
+  "short_name": "Kanban",
+  "description": "A free, open-source kanban board for small teams: four lanes, Markdown cards, checklists, tags, comments, realtime sync, and 39 MCP tools for AI agents.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f3",
+  "theme_color": "#1c1917",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,181 @@
+@import './theme.css';
+
+/* The marketing page has no React focus utilities, so restore a visible focus
+   ring for every link and control. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Marketing page components. Kept in one place so the static landing page stays
+   framework-free: it renders without JavaScript and shares the app's tokens. */
+@layer components {
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-muted;
+  }
+
+  .eyebrow-dark {
+    @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45;
+  }
+
+  .section-title {
+    @apply mt-3 max-w-2xl text-[1.75rem] font-semibold leading-[1.15] tracking-[-0.03em] text-ink sm:text-[2rem];
+  }
+
+  .lede {
+    @apply max-w-2xl text-[15px] leading-relaxed text-muted;
+  }
+
+  .btn-primary {
+    @apply inline-flex h-10 items-center justify-center rounded-lg bg-accent px-4 text-sm font-medium text-white transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+  }
+
+  .btn-secondary {
+    @apply inline-flex h-10 items-center justify-center rounded-lg border border-line bg-surface px-4 text-sm font-medium text-ink transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+  }
+
+  .dot {
+    @apply inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70;
+  }
+
+  .hero-figure {
+    @apply overflow-hidden rounded-2xl border border-line bg-surface shadow-lift;
+  }
+
+  .hero-figure figcaption {
+    @apply border-t border-line bg-surface px-4 py-3 text-[12px] leading-relaxed text-muted;
+  }
+
+  .feature-card {
+    @apply rounded-xl border border-line bg-canvas p-5;
+  }
+
+  .feature-card h3 {
+    @apply text-[15px] font-semibold tracking-[-0.01em] text-ink;
+  }
+
+  .feature-card p {
+    @apply mt-2 text-[13.5px] leading-relaxed text-muted;
+  }
+
+  .step-card {
+    @apply relative rounded-xl border border-line bg-surface p-5;
+  }
+
+  .step-card h3 {
+    @apply mt-3 text-[15px] font-semibold tracking-[-0.01em] text-ink;
+  }
+
+  .step-card p {
+    @apply mt-2 text-[13.5px] leading-relaxed text-muted;
+  }
+
+  .step-number {
+    @apply text-[11px] font-semibold tabular-nums tracking-[0.12em] text-accent;
+  }
+
+  .stat {
+    @apply flex flex-col gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3;
+  }
+
+  .stat-value {
+    @apply text-2xl font-semibold tracking-[-0.02em] text-white tabular-nums;
+  }
+
+  .stat-label {
+    @apply text-[11px] leading-snug text-white/45;
+  }
+
+  .code-card {
+    @apply min-w-0 overflow-hidden rounded-xl border border-white/10 bg-black/25 p-5;
+  }
+
+  .code-card-light {
+    @apply border-line bg-surface-soft;
+  }
+
+  .code-card-title {
+    @apply text-[10.5px] font-semibold uppercase tracking-[0.12em] text-white/40;
+  }
+
+  .code-card-light .code-card-title {
+    @apply text-muted;
+  }
+
+  .code-card pre {
+    @apply mt-3 overflow-x-auto text-[12.5px] leading-relaxed text-white/80;
+  }
+
+  .code-card-light pre {
+    @apply text-ink;
+  }
+
+  .code-card code {
+    @apply font-mono;
+  }
+
+  .code-card-note {
+    @apply mt-3 text-[12px] text-muted;
+  }
+
+  .facts-table {
+    @apply w-full border-collapse text-left text-[13.5px];
+  }
+
+  .facts-table tr {
+    @apply border-b border-line last:border-0;
+  }
+
+  .facts-table th {
+    @apply w-[9.5rem] bg-surface-soft px-4 py-3 align-top text-[11px] font-semibold uppercase tracking-[0.1em] text-muted sm:w-[11rem] sm:px-5;
+  }
+
+  .facts-table td {
+    @apply px-4 py-3 align-top leading-relaxed text-ink sm:px-5;
+  }
+
+  /* On narrow screens a two-column facts table gets too cramped; stack each
+     row into a label/value block instead of shrinking the value column. */
+  @media (max-width: 639px) {
+    .facts-table tr {
+      @apply block border-b border-line px-4 py-3 last:border-0;
+    }
+
+    .facts-table th {
+      @apply block w-auto bg-transparent p-0 text-[10px];
+    }
+
+    .facts-table td {
+      @apply block p-0 pt-1 text-[13px];
+    }
+  }
+
+  .inline-code {
+    @apply rounded-md border border-line bg-surface-soft px-1.5 py-0.5 font-mono text-[0.85em] text-ink;
+  }
+
+  .link-arrow {
+    @apply inline-flex items-center gap-2 text-sm font-medium text-accent underline decoration-accent/25 underline-offset-4 transition-colors hover:decoration-accent;
+  }
+
+  .faq-q {
+    @apply text-[15px] font-semibold tracking-[-0.01em] text-ink;
+  }
+
+  .faq-a {
+    @apply mt-2 text-[13.5px] leading-relaxed text-muted;
+  }
+
+  .faq-link {
+    @apply font-medium text-accent hover:underline;
+  }
+
+  .footer-heading {
+    @apply text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted;
+  }
+
+  .footer-link {
+    @apply text-sm text-muted transition-colors hover:text-ink;
+  }
+}

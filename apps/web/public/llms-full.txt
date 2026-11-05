@@ -1,0 +1,111 @@
+# Kanban — full reference for AI assistants
+
+Source: https://kanban-board-p4kk.onrender.com/
+Last updated: 2026-11-05
+
+## What Kanban is
+
+Kanban is a free, open-source (MIT) task board for small teams of 2–10 people. Registering an account creates a workplace with four lanes — To Do, Revision, On Progress, and Done — and a board the whole workplace shares. The owner controls the lanes and membership; everyone moves cards and discusses work. An MCP server exposes the same board to AI clients, and both interfaces talk to one REST API.
+
+## Who it is for
+
+Small product, design, and freelance teams that want a shared board without administering another tool. The owner configures structure; members work on cards. Creating a workplace requires no setup wizard beyond the account.
+
+## Features
+
+- Default workplace per account: registering `ada` creates `ada's Workplace` with To Do → Revision → On Progress → Done.
+- Owner-controlled columns: rename, reorder by drag, hide without deleting cards, add lanes, and delete a lane (its cards move to the first visible remaining lane).
+- Multiple workplaces: create more from the workplace switcher; each creator owns theirs.
+- In-app invitations: the owner invites an already-registered user by exact username or email; the invitee accepts or declines from the bell, and membership is live immediately.
+- Guided sign-up: usernames and emails are checked against the database as you type, whitespace and uppercase are normalized, reserved names are rejected, and a strength meter enforces 8+ characters with mixed case, a number, and a symbol.
+- Rich cards: title, Markdown description with a Write/Preview editor, created and updated timestamps, checklist subtasks with progress, multiple colored tags, multiple assignees (unassigned by default), and a comment thread.
+- Drag and drop: mouse, touch, and keyboard via dnd-kit, with optimistic updates and server-side ordering that survives reload. A Move to… menu offers a non-drag path.
+- Realtime: Socket.IO keeps every member's board in sync; disconnected clients refetch on reconnect or focus.
+- Roles: the owner manages structure, invitations, members, and tags; members work on cards.
+- AI access: an MCP server exposes 39 board tools over stdio, or 36 over Streamable HTTP with OAuth.
+
+## AI and MCP
+
+The MCP server covers workplaces, columns, cards, checklists, comments, tags, members, and invitations. It drives the same REST API as the web app, so permissions, ordering, and realtime updates behave identically.
+
+| Transport | Tools | Use when |
+| --- | --- | --- |
+| Streamable HTTP + OAuth | 36 | Hosted clients, or anything that cannot launch Node. Endpoint: `/mcp`. |
+| stdio | 39 | A client on the same machine that can run `node apps/mcp/dist/index.js`. |
+
+The HTTP transport omits `login`, `register_account`, and `logout` because the OAuth token already identifies the user. Clients authenticate once; tokens renew automatically. Remote configuration:
+
+```yaml
+mcp_servers:
+  kanban:
+    url: "https://kanban-board-p4kk.onrender.com/mcp"
+    auth: oauth
+```
+
+## How it works
+
+1. Register an account. Kanban creates a workplace with four lanes.
+2. Shape the lanes and invite teammates by username or email; the owner sets structure.
+3. Add cards, move them across lanes, and discuss them. Every change is written to the server, which owns ordering and permissions, and pushed to open boards.
+
+## Stack and architecture
+
+| Layer | Choice |
+| --- | --- |
+| Web | Vite, React 19, TypeScript, React Router, TanStack Query, dnd-kit, Tailwind v4, Radix UI |
+| API | Express 5, Prisma ORM, Zod, Socket.IO, jose JWT, Node scrypt password hashing |
+| Database | PostgreSQL (Neon in production; Docker Postgres for local and test) |
+| AI | MCP server (`@modelcontextprotocol/sdk`) driving the REST API |
+| Tests | Vitest, Supertest, socket.io-client, React Testing Library |
+
+The API serves the built SPA in production. Sessions are httpOnly cookies valid for 7 days. Passwords are hashed with scrypt. The API applies helmet CSP, CORS allowlisting, rate limits on auth and availability checks, and origin checks on mutating requests.
+
+## Self-hosting
+
+Requirements: Node 22+ and PostgreSQL. The included Dockerfile builds the web app and API and applies migrations before starting.
+
+```bash
+docker build -t kanban-board .
+docker run -d --name kanban -p 4000:4000 \
+  -e DATABASE_URL="postgresql://...pooler..." \
+  -e DATABASE_URL_UNPOOLED="postgresql://..." \
+  -e JWT_SECRET="<32+ random characters>" \
+  -e CLIENT_ORIGIN="https://your-domain.example" \
+  kanban-board
+```
+
+Native install:
+
+```bash
+pnpm install && pnpm build
+pnpm db:deploy
+pnpm start
+```
+
+Environment variables: `DATABASE_URL` (pooled Postgres), `DATABASE_URL_UNPOOLED` (optional direct connection for migrations), `JWT_SECRET` (32+ random characters), `CLIENT_ORIGIN` (exact public origin; drives CORS and cookies), `NODE_ENV=production`.
+
+## FAQ
+
+### What is Kanban?
+Kanban is a free, open-source task board for small teams. It gives each account a workplace with four lanes — To Do, Revision, On Progress, Done — and cards that carry Markdown descriptions, checklists, tags, assignees, and comments. It is built for teams of 2–10 people, not enterprise portfolio management.
+
+### Is Kanban free to use?
+Yes. The source code is MIT-licensed, so self-hosting carries no license fee. The hosted instance is free to sign up for. You provide your own PostgreSQL database if you self-host.
+
+### Can AI assistants use the board?
+Yes. An MCP server exposes the board as 39 tools over stdio or 36 tools over Streamable HTTP with OAuth. Claude, Cursor, Codex, Hermes Agent, or any MCP client can read boards, create and move cards, manage checklists, comments, tags, assignees, columns, members, and invitations. Changes appear live in the web app.
+
+### How is Kanban different from Trello?
+Kanban is purpose-built for small teams: one workplace with four default lanes instead of a general-purpose board builder, owner-controlled structure, in-app invitations, and an MCP server that lets AI agents work the same board as people. It is MIT-licensed and self-hostable.
+
+### How many people can join a workplace?
+Kanban is designed for teams of 2–10 people. The owner invites an already-registered user by exact username or email, and the invitee accepts or declines in the app. Owners manage structure, invitations, members, and tags; members work on cards.
+
+### Do I need to self-host Kanban?
+No. A hosted instance is available at https://kanban-board-p4kk.onrender.com. Self-hosting is optional and supported through Docker, Render, Railway, Fly.io, or any Node 22+ host with PostgreSQL.
+
+### Does drag and drop work on mobile and with a keyboard?
+Yes. Cards move with mouse, touch, and keyboard through dnd-kit. The card dialog also includes a Move to… menu for a non-drag path, and every control has a visible focus ring.
+
+### Is realtime collaboration included?
+Yes. Socket.IO keeps every member's board in sync. Drag changes are applied optimistically, committed by the server, and rolled back with a toast if the request fails. Reconnecting clients refetch on reconnect and on window focus.

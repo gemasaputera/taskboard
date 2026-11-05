@@ -15,6 +15,7 @@ const groups: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Product',
     links: [
+      { label: 'Home', href: '/' },
       { label: 'Board', href: '/app' },
       { label: 'Documentation', href: DOCS_URL, external: true },
       { label: 'MCP server', href: `${DOCS_URL}/docs/mcp`, external: true },

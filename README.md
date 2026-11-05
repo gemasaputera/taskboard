@@ -17,6 +17,7 @@ checklist, tags, comments — moving live with the people who care about it.
 - [Tests](#tests)
 - [MCP server](#mcp-server-ai-agents)
 - [Documentation site](#documentation-site-readme)
+- [Public pages and search metadata](#public-pages-and-search-metadata)
 - [Environment variables](#environment-variables)
 - [How it works](#how-it-works)
 - [Deploy](#deploy)
@@ -50,12 +51,12 @@ checklist, tags, comments — moving live with the people who care about it.
 
 ## Stack
 
-| Layer    | Choice                                                                                  |
-| -------- | --------------------------------------------------------------------------------------- |
+| Layer    | Choice                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------- |
 | Web      | Vite, React 19, TypeScript, React Router, TanStack Query, dnd-kit, Tailwind v4, Radix UI |
 | API      | Express 5, Prisma ORM, Zod, Socket.IO, `jose` JWT, Node `scrypt` password hashing        |
 | Database | PostgreSQL (Neon in production; Docker Postgres for local/test)                          |
-| AI       | MCP stdio server (`@modelcontextprotocol/sdk`) driving the REST API                     |
+| AI       | MCP stdio server (`@modelcontextprotocol/sdk`) driving the REST API                      |
 | Tests    | Vitest, Supertest, socket.io-client, React Testing Library                               |
 
 ## Quick start
@@ -188,7 +189,7 @@ Remote clients can use the OAuth-protected endpoint at `/mcp`:
 ```yaml
 mcp_servers:
   kanban:
-    url: "https://kanban-board-p4kk.onrender.com/mcp"
+    url: 'https://kanban-board-p4kk.onrender.com/mcp'
     auth: oauth
 ```
 
@@ -229,6 +230,33 @@ The [sync workflow](.github/workflows/readme-sync.yml) uploads `docs/readme/` on
 `main` that touches those files. See [docs/readme-setup.md](docs/readme-setup.md) for the one-time
 ReadMe project setup, category names, and frontmatter reference.
 
+## Public pages and search metadata
+
+The signed-in app is a SPA, but `/` is a static, server-rendered marketing page so crawlers that
+do not run JavaScript still see the full content.
+
+| Path                                                                    | Source                  | Notes                                                                                                      |
+| :---------------------------------------------------------------------- | :---------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `/`                                                                     | `apps/web/landing.html` | Static HTML + `src/landing.css`; no JS required. Served by the API in production and at `/` in `vite dev`. |
+| `/login`, `/register`                                                   | SPA routes              | Client-rendered; title, description, and canonical are set with `useSeo`.                                  |
+| `/app/*`                                                                | SPA routes              | `noindex` via `X-Robots-Tag` and a robots meta tag, and disallowed in `robots.txt`.                        |
+| `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/llms-full.txt`, `/og.png` | `apps/web/public/`      | Copied to the build unchanged.                                                                             |
+
+The landing page carries Open Graph/Twitter tags, one canonical URL, and four JSON-LD blocks
+(`Organization`, `WebSite`, `SoftwareApplication`, `FAQPage`). The API hashes the inline JSON-LD
+at startup and adds the hashes to the `script-src` CSP directive, so the strict policy needs no
+`unsafe-inline`.
+
+When the public origin changes, update it in these places:
+
+- `apps/web/landing.html` — canonical, OG/Twitter URLs, and JSON-LD `url`/`@id` values
+- `apps/web/index.html` — default OG/Twitter image URL
+- `apps/web/src/lib/seo.ts` — `SITE_URL` for SPA canonicals
+- `apps/web/public/robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`
+
+Build the web app with `pnpm build` (or `pnpm --filter @kanban/web build`) to regenerate
+`landing.html`, the hashed CSS, and the copied public files in `apps/web/dist/`.
+
 ## Environment variables
 
 Two env files exist, and both are gitignored. Their templates (`.env.example`, checked in) are the
@@ -240,17 +268,17 @@ only env files in the repository:
 The API and the Prisma scripts load `.env.local` first, then `apps/api/.env`, and a real process
 environment wins over both.
 
-| Variable                | Where             | Purpose                                                                                                                       |
-| ----------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`          | root `.env.local` | Pooled Postgres connection used by the API (`neon deploy` writes it).                                                          |
-| `DATABASE_URL_UNPOOLED` | root `.env.local` | Direct Postgres connection; mapped to `DIRECT_URL`.                                                                            |
-| `DIRECT_URL`            | `apps/api`        | Direct Postgres connection for Prisma CLI/migrations. Defaults to `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`.                |
-| `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it.                                                  |
-| `PORT`                  | `apps/api`        | API port, default `4000`.                                                                                                      |
+| Variable                | Where             | Purpose                                                                                                                                     |
+| ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | root `.env.local` | Pooled Postgres connection used by the API (`neon deploy` writes it).                                                                       |
+| `DATABASE_URL_UNPOOLED` | root `.env.local` | Direct Postgres connection; mapped to `DIRECT_URL`.                                                                                         |
+| `DIRECT_URL`            | `apps/api`        | Direct Postgres connection for Prisma CLI/migrations. Defaults to `DATABASE_URL_UNPOOLED`, then `DATABASE_URL`.                             |
+| `JWT_SECRET`            | `apps/api`        | HS256 signing secret, **32+ characters**. Generate your own; never commit it.                                                               |
+| `PORT`                  | `apps/api`        | API port, default `4000`.                                                                                                                   |
 | `CLIENT_ORIGIN`         | `apps/api`        | Allowed browser origin(s) for CORS, Origin checks, and Socket.IO. Comma-separated; loopback ports are accepted when this is a loopback URL. |
-| `PUBLIC_URL`            | `apps/api`        | Public origin for OAuth metadata and `/mcp`. Defaults to the first `CLIENT_ORIGIN` in production, `http://localhost:PORT` in development. |
-| `NODE_ENV`              | `apps/api`        | `development`, `test`, or `production` (enables static SPA + secure cookies).                                                   |
-| `TEST_DATABASE_URL`     | `apps/api`        | Used by the Vitest setup; defaults to the local `kanban_test` database.                                                        |
+| `PUBLIC_URL`            | `apps/api`        | Public origin for OAuth metadata and `/mcp`. Defaults to the first `CLIENT_ORIGIN` in production, `http://localhost:PORT` in development.   |
+| `NODE_ENV`              | `apps/api`        | `development`, `test`, or `production` (enables static SPA + secure cookies).                                                               |
+| `TEST_DATABASE_URL`     | `apps/api`        | Used by the Vitest setup; defaults to the local `kanban_test` database.                                                                     |
 
 **Never commit real credentials.** `.env`, `.env.*`, `*.local`, and `.neon` are gitignored; only
 `*.env.example` templates are tracked.
@@ -294,7 +322,7 @@ single API instance.
 | Rename/delete tags                                          |   —    |  ✅   |
 | Add/rename/reorder/hide/delete columns                      |   —    |  ✅   |
 | Invite/cancel invitations, remove members, rename workplace |   —    |  ✅   |
-| Leave workplace                                             |   ✅   |  —    |
+| Leave workplace                                             |   ✅   |   —   |
 
 Comment authors can edit their own comments; authors and the owner can delete them. The owner
 cannot remove themselves or leave their own workplace (ownership transfer is not implemented).
@@ -323,8 +351,8 @@ The included `Dockerfile` builds both apps and starts the API with migrations ap
      `DIRECT_URL`).
    - `CLIENT_ORIGIN` — the public URL Render assigns, e.g. `https://kanban-board.onrender.com`.
    - `JWT_SECRET` is generated for you.
-   Paste each value **bare**: Render stores exactly what you type, so `"postgresql://…"` with
-   surrounding quotes — valid inside a `.env` file — becomes an invalid URL at runtime.
+     Paste each value **bare**: Render stores exactly what you type, so `"postgresql://…"` with
+     surrounding quotes — valid inside a `.env` file — becomes an invalid URL at runtime.
 4. Deploy. The entrypoint applies migrations before the API starts listening.
 
 Free instances spin down after ~15 minutes idle; connected clients reconnect when the service wakes.
@@ -365,13 +393,13 @@ working.
 
 ### Production variables
 
-| Variable                | Value                                                                     |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `DATABASE_URL`          | Pooled Postgres connection (Neon pooler or your own).                     |
+| Variable                | Value                                                                                               |
+| ----------------------- | --------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | Pooled Postgres connection (Neon pooler or your own).                                               |
 | `DATABASE_URL_UNPOOLED` | Optional. Direct connection; mapped to `DIRECT_URL` for migrations, falling back to `DATABASE_URL`. |
-| `JWT_SECRET`            | 32+ random characters. Never reuse the example value.                      |
-| `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`. Drives CORS + cookies. |
-| `NODE_ENV`              | `production` — serves the SPA from the API, enables `Secure` cookies on https origins. |
+| `JWT_SECRET`            | 32+ random characters. Never reuse the example value.                                               |
+| `CLIENT_ORIGIN`         | Exact public origin, e.g. `https://kanban.example`. Drives CORS + cookies.                          |
+| `NODE_ENV`              | `production` — serves the SPA from the API, enables `Secure` cookies on https origins.              |
 
 `docker/entrypoint.sh` runs `prisma migrate deploy` before starting the server. Set only
 `DATABASE_URL` if your host provides a single connection string — migrations reuse it. To run
