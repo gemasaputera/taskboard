@@ -168,6 +168,13 @@ cardsRouter.put('/cards/:cardId/assignees', async (req, res) => {
         data: uniqueUserIds.map((userId) => ({ cardId: card.id, userId })),
       });
     }
+
+    // Join-table writes never touch the Card row, so bump it here to keep
+    // `card.updated` (and the card's `updatedAt`) honest.
+    await tx.card.update({
+      where: { id: card.id },
+      data: { updatedAt: new Date() },
+    });
   });
 
   emitToWorkplace(card.workplaceId, REALTIME_EVENTS.cardUpdated, {
@@ -210,6 +217,12 @@ cardsRouter.put('/cards/:cardId/tags', async (req, res) => {
         data: uniqueTagIds.map((tagId) => ({ cardId: card.id, tagId })),
       });
     }
+
+    // Same as assignees: the Card row must change for `card.updated` to be true.
+    await tx.card.update({
+      where: { id: card.id },
+      data: { updatedAt: new Date() },
+    });
   });
 
   emitToWorkplace(card.workplaceId, REALTIME_EVENTS.cardUpdated, {
