@@ -85,6 +85,14 @@ export async function moveCardOrder(
 
   await bulkUpdateCardOrder(tx, rows);
 
+  // bulkUpdateCardOrder writes through raw SQL, which bypasses Prisma's
+  // @updatedAt. Stamp only the card the user actually moved so "updated"
+  // reflects the drag without disturbing every re-sequenced sibling.
+  await tx.card.update({
+    where: { id: card.id },
+    data: { updatedAt: new Date() },
+  });
+
   return { fromColumnId: card.columnId, toColumnId: targetColumnId, position: targetIndex };
 }
 
