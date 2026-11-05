@@ -1,0 +1,44 @@
+# Kanban — a live team board with AI access
+
+> Kanban is a free, MIT-licensed kanban board for small teams of 2–10 people. Every account gets a workplace with four lanes (To Do, Revision, On Progress, Done), Markdown cards with checklists, tags, assignees, and comments, realtime sync over Socket.IO, and an MCP server exposing 39 board tools so AI clients can move work alongside people.
+
+The hosted app runs at https://kanban-board-p4kk.onrender.com. The source is public on GitHub, and both the web app and the MCP server drive the same REST API, so a change made by an AI client appears live in an open browser.
+
+## Core pages
+
+- [Home](https://kanban-board-p4kk.onrender.com/): what Kanban is, features, how it works, AI/MCP access, self-hosting, and FAQ.
+- [Sign in](https://kanban-board-p4kk.onrender.com/login): existing accounts.
+- [Create an account](https://kanban-board-p4kk.onrender.com/register): creates a username, a workplace, and the default four lanes.
+
+## Documentation
+
+- [Docs home](https://kanbantask.readme.io/docs/welcome): overview and the two ways to use Kanban (web app or MCP server).
+- [Quick start](https://kanbantask.readme.io/docs/quickstart): run the app locally in five steps.
+- [How it works](https://kanbantask.readme.io/docs/concepts): workplaces, roles, ordering, and realtime.
+- [MCP server](https://kanbantask.readme.io/docs/mcp): HTTP OAuth and stdio setup for Claude, Cursor, Codex, and Hermes Agent.
+- [MCP tools](https://kanbantask.readme.io/docs/mcp-tools): the full tool list.
+- [REST API](https://kanbantask.readme.io/docs/rest-api): endpoints, auth, and payloads.
+- [Configuration](https://kanbantask.readme.io/docs/configuration): environment variables and security settings.
+- [Deployment](https://kanbantask.readme.io/docs/deployment): Render, Railway, Fly.io, Docker, and native Node.
+
+## Source and project
+
+- [GitHub repository](https://github.com/gemasaputera/taskboard): code, issues, and the MIT license.
+- [README](https://github.com/gemasaputera/taskboard#readme): features, stack, local setup, and deployment.
+- [MCP guide (repository)](https://github.com/gemasaputera/taskboard/blob/main/docs/mcp.md): client-specific setup notes.
+
+## Key facts
+
+- License: MIT. Self-hosting has no license fee.
+- Intended team size: 2–10 people per workplace.
+- Default lanes: To Do, Revision, On Progress, Done. Owners can rename, reorder, hide, add, and delete lanes.
+- Cards: Markdown description, checklist subtasks with progress, multiple colored tags, multiple assignees, comment thread, created/updated dates.
+- Realtime: Socket.IO with optimistic updates and server-owned ordering; clients refetch on reconnect or focus.
+- AI: 39 MCP tools over stdio; 36 over Streamable HTTP with OAuth (login, register, and logout are omitted because the token already identifies the user).
+- Stack: React 19, Vite, TypeScript, React Router, TanStack Query, dnd-kit, Tailwind v4, Radix UI; Express 5, Prisma, PostgreSQL, Socket.IO, Zod, jose JWT, Node scrypt.
+- Self-hosting requirements: Node 22+, PostgreSQL (Neon or Docker), and the environment variables `DATABASE_URL`, `JWT_SECRET`, and `CLIENT_ORIGIN`.
+- Security: httpOnly session cookies (7 days), scrypt password hashing, helmet CSP, CORS allowlist, rate-limited auth, origin checks on mutations.
+
+## Optional
+
+- [llms-full.txt](https://kanban-board-p4kk.onrender.com/llms-full.txt): expanded product, setup, and FAQ content in one file.

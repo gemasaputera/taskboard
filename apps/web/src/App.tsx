@@ -18,6 +18,7 @@ import { RegisterPage } from './features/auth/RegisterPage';
 import { NewWorkplaceDialog } from './features/workplace/NewWorkplaceDialog';
 import { getLastWorkplaceId } from './features/workplace/selection';
 import { AppLayout } from './components/AppLayout';
+import { useSeo } from './lib/seo';
 
 const BoardPage = lazy(() =>
   import('./features/board/BoardPage').then((module) => ({ default: module.BoardPage })),
@@ -109,6 +110,12 @@ function WorkplaceRedirect() {
 
 function NotFoundPage() {
   const { user } = useAuth();
+  useSeo({
+    title: 'Page not found · Kanban',
+    description: 'The page you are looking for does not exist or has moved.',
+    robots: 'noindex, nofollow',
+  });
+
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <div className="flex flex-1 items-center justify-center p-6">

@@ -32,11 +32,11 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
             A calmer way to ship
           </p>
-          <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] xl:text-5xl">
+          <p className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-white xl:text-5xl">
             The board your team
             <br />
             actually keeps in sync.
-          </h1>
+          </p>
           <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/60">
             One workplace, four clear lanes, and every task — checklist, tags, comments — moving
             live with the people who care about it.
@@ -102,7 +102,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
 
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-10">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold tracking-[-0.02em] text-ink">{title}</h2>
+            <h1 className="text-2xl font-semibold tracking-[-0.02em] text-ink">{title}</h1>
             <p className="mt-2 text-sm leading-relaxed text-muted">{subtitle}</p>
           </div>
 
