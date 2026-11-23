@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/gemasaputera/taskboard/security/advisories/new
+    about: Report privately. Please do not open a public issue.
+  - name: Question or idea
+    url: https://github.com/gemasaputera/taskboard/discussions
+    about: Ask here if you are not sure it is a bug or a feature request.
+  - name: Contributing guide
+    url: https://github.com/gemasaputera/taskboard/blob/main/CONTRIBUTING.md
+    about: Setup, checks to run, and what a good pull request looks like.
