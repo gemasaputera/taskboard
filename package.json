@@ -32,14 +32,14 @@
     "@eslint/js": "^9.34.0",
     "eslint": "^9.34.0",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
+    "eslint-plugin-react-refresh": "^0.5.8",
     "globals": "^16.3.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.10.1",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.41.0"
+    "typescript-eslint": "^8.73.0"
   },
   "dependencies": {
-    "@neon/config": "^1.10.0",
-    "@neon/env": "^1.6.8"
+    "@neon/config": "^1.14.5",
+    "@neon/env": "^1.6.15"
   }
 }
