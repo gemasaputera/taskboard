@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose a change in behaviour, not just a missing button.
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep it about the problem, not the solution — the best fix is sometimes smaller
+        than the one being proposed.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and where does the app get in the way?
+      placeholder: I want to move a set of cards between lanes at once, but drag and drop only takes one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Including just living with it, if the workaround is cheap.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Who is this for
+      options:
+        - Everyone using a board
+        - Workplace admins
+        - People running the project themselves
+        - Contributors to the codebase
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to open a pull request for this.
+          required: false

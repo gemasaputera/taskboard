@@ -1,0 +1,74 @@
+name: Bug report
+description: Something behaves differently from what you expected.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A reproducible bug gets fixed much faster than a described one.
+
+        If this is a **security** problem, close this and report it privately:
+        https://github.com/gemasaputera/taskboard/security/advisories/new
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected to see instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence that shows the problem. Include the button, route, or API call.
+      placeholder: |
+        1. Sign in as a member of a workplace
+        2. Open a card, drag it to the next lane
+        3. Reload the board
+        4. The card is back in the old lane
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - Board (drag and drop, lanes, cards)
+        - Card detail (checklist, tags, comments)
+        - Auth (sign up, sign in, OAuth, invites)
+        - MCP server
+        - API
+        - Docs and site
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      description: The SHA you are on (`git rev-parse --short HEAD`) if you run it yourself.
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Browser console errors, server output, or a screenshot. Redact tokens and emails.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This is not a security vulnerability (those go to the private advisory link above).
+          required: true
